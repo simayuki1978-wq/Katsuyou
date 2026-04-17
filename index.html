@@ -85,19 +85,27 @@
     </div>
 </div>
 
-<div id="scr-card" class="screen">
-    <div class="card">
-        <div class="card-top">
-            <div onclick="speak()" style="cursor:pointer; font-size: 2.2rem; margin-bottom: 12px;">🔊</div>
-            <h2 class="card-kanji" id="c-kanji">--</h2>
-            <div class="card-yomi" id="c-yomi">--</div>
-            <div class="card-meanings" id="c-meanings">--</div>
+<div id="scr-quiz" class="screen">
+    <div class="quiz-box" style="padding: 20px; width: 90%; max-width: 380px;">
+        <div style="margin: 10px 0;">
+            <div id="q-word" style="font-size: 2.8rem; font-weight: 900; color: var(--blue); line-height: 1.2;">--</div>
+            <div id="q-yomi" style="font-size: 1.1rem; color: var(--sub); font-weight: 600; margin-top: 5px;">--</div>
         </div>
-        <div id="c-list" style="max-height: 40vh; overflow-y: auto;"></div>
+        
+        <div style="font-size: 1.1rem; margin-top: 15px;">
+            の <b id="q-form" style="color:var(--orange); text-decoration: underline;">--</b> は？
+        </div>
+
+        <input type="text" id="q-input" class="q-input" 
+               style="width: 100%; max-width: 280px; padding: 12px; margin: 20px 0; font-size: 1.2rem; box-sizing: border-box;" 
+               placeholder="答えを入力" autocomplete="off">
+        
+        <div id="q-feedback" class="feedback" style="font-size: 1.1rem;"></div>
     </div>
-    <div class="controls">
-        <button class="btn-ctrl" onclick="prev()">PREV</button>
-        <button class="btn-ctrl" onclick="next()">NEXT</button>
+    
+    <div class="controls" style="margin-top: 20px;">
+        <button class="btn-ctrl" style="background:var(--accent); box-shadow:0 5px 0 #46a302;" onclick="checkQuiz()">回答</button>
+        <button class="btn-ctrl" style="background:var(--sub); box-shadow:0 5px 0 #888;" onclick="nextQuiz()">スキップ</button>
     </div>
 </div>
 
@@ -232,22 +240,30 @@
     function prev() { if (currentIndex > 0) { currentIndex--; updateCard(); } }
 
     // クイズロジック
-    function nextQuiz() {
-        const isVerb = Math.random() > 0.5;
-        const list = isVerb ? verbs : adjs;
-        const heads = isVerb ? vHeaders : aHeaders;
-        const item = list[Math.floor(Math.random() * list.length)];
-        const qCols = [];
-        for (let i = 4; i < heads.length; i++) {
-            if (heads[i] && item[i] && !["グループ", "英語", "ベトナム語"].includes(heads[i])) qCols.push(i);
+   function nextQuiz() {
+    const isVerb = Math.random() > 0.5;
+    const list = isVerb ? verbs : adjs;
+    const heads = isVerb ? vHeaders : aHeaders;
+    const item = list[Math.floor(Math.random() * list.length)];
+    
+    const qCols = [];
+    for (let i = 4; i < heads.length; i++) {
+        if (heads[i] && item[i] && !["グループ", "英語", "ベトナム語"].includes(heads[i])) {
+            qCols.push(i);
         }
-        const col = qCols[Math.floor(Math.random() * qCols.length)];
-        document.getElementById('q-word').innerText = item[0] || "ERROR";
-        document.getElementById('q-form').innerText = heads[col];
-        quizAns = item[col];
-        document.getElementById('q-input').value = "";
-        document.getElementById('q-feedback').innerText = "";
-        document.getElementById('q-input').focus();
+    }
+    
+    const col = qCols[Math.floor(Math.random() * qCols.length)];
+    
+    // 表示の更新
+    document.getElementById('q-word').innerText = item[0] || "ERROR";
+    document.getElementById('q-yomi').innerText = item[1] || ""; // ふりがなを表示
+    document.getElementById('q-form').innerText = heads[col];
+    quizAns = item[col];
+    
+    document.getElementById('q-input').value = "";
+    document.getElementById('q-feedback').innerText = "";
+    document.getElementById('q-input').focus();
     }
 
     function checkQuiz() {
