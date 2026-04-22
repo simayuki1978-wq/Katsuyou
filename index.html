@@ -246,51 +246,61 @@
     }
 
     // クイズ
-    async function openQuiz() {
-        await fetchData('verb');
-        await fetchData('adj');
-        showScreen('quiz-screen');
-        newQuiz();
-    }
+    // クイズ専用の変数（正解判定用）
+  let quizCorrectAnswers = []; 
 
-    function newQuiz() {
-        const pool = [...dataStore.verb.slice(1), ...dataStore.adj.slice(1)];
-        currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
-        const headers = dataStore.verb[0]; // 活用形の名前取得用
-        
-        // ランダムな活用形(E列以降)を選択
-        const colIdx = Math.floor(Math.random() * (currentQuizItem.length - 4)) + 4;
-        const formName = headers[colIdx] || "その";
-        
-        document.getElementById('quiz-question').innerHTML = `「${currentQuizItem[0]} (${currentQuizItem[1]})」の<br><strong>${formName}</strong> のかたちは？`;
-        document.getElementById('quiz-answer').value = '';
-        document.getElementById('quiz-feedback').innerText = '';
-        document.getElementById('quiz-answer').focus();
-    }
+// クイズ開始：動詞のみを対象にする
+  async function openQuiz() {
+    await fetchData('verb'); // 動詞データのみ読み込み
+    showScreen('quiz-screen');
+    newQuiz();
+  }
 
-    function checkAnswer() {
-        const userAns = document.getElementById('quiz-answer').value.trim();
-        const feedback = document.getElementById('quiz-feedback');
-        
-        // 正解判定（全ての活用列をチェックするのは難しいため、問題作成時に正解を保持しておく）
-        // ここでは簡易的に、現在の問題の正解のみを判定
-        if (!currentQuizItem) return;
-        
-        // 実際のスプレッドシート構造に合わせて、全ての列のどれかに合致すればOKとするか、
-        // 特定の列を正解とするか。ここでは出題した列の値を正解とする。
-        // ※CSVのカラムズレに注意。
-        
-        const isCorrect = currentQuizItem.some(val => val === userAns);
+  function newQuiz() {
+    // 動詞データ（ヘッダーを除く1行目以降）を取得
+    const pool = dataStore.verb.slice(1);
+    currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
+    const headers = dataStore.verb[0]; 
+    
+    // 出題する列（E列以降＝インデックス4以降）をランダムに選択
+    const colIdx = Math.floor(Math.random() * (currentQuizItem.length - 4)) + 4;
+    const formName = headers[colIdx] || "その";
+    
+    // 正解の候補を作成（漢字の正解、ひらがなの正解などがあればそれらを配列に入れる）
+    // ここでは、その列に書かれている値そのものを正解とします
+    quizCorrectAnswers = [currentQuizItem[colIdx].trim()];
 
-        if (isCorrect && userAns !== "") {
-            feedback.style.color = "var(--primary)";
-            feedback.innerText = "OK！";
-            setTimeout(newQuiz, 1000);
-        } else {
-            feedback.style.color = "#ff4b4b";
-            feedback.innerText = "ちがうよ！";
-        }
+    document.getElementById('quiz-question').innerHTML = 
+        `「${currentQuizItem[0]} (${currentQuizItem[1]})」の<br><strong>${formName}</strong> のかたちは？`;
+    
+    document.getElementById('quiz-answer').value = '';
+    document.getElementById('quiz-feedback').innerText = '';
+    document.getElementById('quiz-answer').focus();
+  }
+
+  function checkAnswer() {
+    const userAns = document.getElementById('quiz-answer').value.trim();
+    const feedback = document.getElementById('quiz-feedback');
+    
+    if (!userAns) return;
+
+    // 正解判定
+    // quizCorrectAnswersに含まれる値、またはスプレッドシートのどこかの列の値と一致するか
+    // （漢字/ひらがな両方対応のため、行全体から探すロジックを少し残しつつ、空白を除外）
+    const isCorrect = currentQuizItem.some((val, index) => {
+        return index >= 4 && val === userAns; // E列以降の活用形と一致するか
+    });
+
+    if (isCorrect) {
+        feedback.style.color = "var(--primary)";
+        feedback.innerText = "OK！";
+        setTimeout(newQuiz, 1000);
+    } else {
+        feedback.style.color = "#ff4b4b";
+        feedback.innerText = "ちがうよ！";
+        // 正解を表示したい場合はここに正解を表示する処理を追加できます
     }
+  }
 </script>
 </body>
 </html>
