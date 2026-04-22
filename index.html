@@ -67,3 +67,103 @@
 <script src="app.js"></script>
 </body>
 </html>
+
+:root {
+    --bg:#f5f7fb;
+    --card:#fff;
+    --text:#222;
+    --accent:#58cc02;
+}
+
+body.dark {
+    --bg:#121212;
+    --card:#1e1e1e;
+    --text:#fff;
+}
+
+body {
+    margin:0;
+    font-family:sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    text-align:center;
+
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:manipulation;
+}
+
+.screen { display:none; padding:20px; }
+.active { display:block; }
+
+button {
+    padding:15px;
+    margin:10px;
+    border:none;
+    border-radius:15px;
+    font-size:18px;
+    background:var(--accent);
+    color:white;
+}
+
+#darkToggle {
+    position:fixed;
+    top:10px;
+    right:10px;
+}
+
+/* table */
+.table-wrap {
+    overflow:auto;
+    max-height:80vh;
+}
+
+/* card */
+.card-container {
+    perspective:1000px;
+    width:90%;
+    max-width:400px;
+    height:250px;
+    margin:20px auto;
+}
+
+.card-inner {
+    transition:transform 0.6s;
+    transform-style:preserve-3d;
+    width:100%;
+    height:100%;
+}
+
+.card-inner.flip {
+    transform:rotateY(180deg);
+}
+
+.card-face {
+    position:absolute;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    font-size:22px;
+    border-radius:20px;
+    background:var(--card);
+    backface-visibility:hidden;
+}
+
+.card-back {
+    transform:rotateY(180deg);
+}
+
+.stats {
+    margin-top:10px;
+    font-size:18px;
+}
+
+input {
+    padding:10px;
+    font-size:18px;
+    width:80%;
+    border-radius:10px;
+}
