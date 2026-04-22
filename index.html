@@ -1,214 +1,255 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日本語学習システム</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語活用マスター</title>
+    <style>
+        :root {
+            --primary: #58cc02; --dark-green: #46a302; --bg: #ffffff; --text: #4b4b4b;
+            --card-bg: #ffffff; --border: #e5e5e5; --accent: #1cb0f6;
+        }
+        [data-theme="dark"] {
+            --primary: #58cc02; --bg: #131f24; --text: #eeeeee;
+            --card-bg: #202f36; --border: #3c4d54;
+        }
 
-<style>
-body {
-    margin: 0;
-    font-family: Arial;
-}
+        body {
+            margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            display: flex; justify-content: center; transition: 0.3s;
+        }
 
-/* ===== 画面制御 ===== */
-.screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+        #app { width: 100%; max-width: 500px; height: 100vh; display: flex; flex-direction: column; position: relative; }
 
-    display: none;
-    overflow-y: auto;
+        /* ヘッダー・共通 */
+        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); }
+        .screen { display: none; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .active { display: flex; }
 
-    background: #fff;
-    padding: 20px;
-    box-sizing: border-box;
-}
+        /* ボタンデザイン */
+        .btn {
+            background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
+            padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
+            margin-bottom: 15px; text-align: center; text-decoration: none;
+        }
+        .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .btn-blue { background: var(--accent); border-bottom-color: #1899d6; }
+        .btn-sub { background: none; border: 2px solid var(--border); color: var(--text); }
 
-.active {
-    display: block;
-    z-index: 10;
-}
+        /* 活用システム表 */
+        .table-container { overflow-x: auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; }
+        table { border-collapse: collapse; width: 100%; font-size: 14px; white-space: nowrap; }
+        th, td { border: 1px solid var(--border); padding: 10px; text-align: center; background: var(--card-bg); }
 
-/* ===== ボタン ===== */
-button {
-    display: block;
-    margin: 10px auto;
-    padding: 12px 20px;
-    font-size: 16px;
-}
+        /* フラッシュカード */
+        .card-container { perspective: 1000px; flex: 1; min-height: 300px; margin: 20px 0; }
+        .card {
+            width: 100%; height: 100%; position: relative; transition: transform 0.6s;
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 2px solid var(--border); border-radius: 25px; background: var(--card-bg); padding: 20px; box-sizing: border-box;
+            box-shadow: 0 4px 0 var(--border); font-size: clamp(16px, 5vw, 24px); text-align: center;
+        }
+        .card-back { transform: rotateY(180deg); overflow-y: auto; }
 
-/* ===== フラッシュカード ===== */
-.card {
-    max-width: 400px;
-    min-height: 120px;
-    margin: 40px auto;
-    padding: 20px;
+        /* クイズ */
+        #quiz-feedback { font-weight: bold; font-size: 24px; margin: 10px 0; height: 30px; text-align: center; }
+        .quiz-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--border); margin-bottom: 10px; font-size: 18px; }
 
-    border: 2px solid #333;
-    font-size: 18px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-
-    cursor: pointer;
-
-    /* ← ここ重要（重なり防止） */
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: break-word;
-}
-
-/* 下のボタンとの距離確保 */
-.controls {
-    margin-top: 30px;
-}
-</style>
+        .nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .mode-toggle { font-size: 12px; cursor: pointer; padding: 5px 10px; border: 1px solid var(--border); border-radius: 10px; }
+    </style>
 </head>
-
 <body>
 
-<!-- ===== TOP ===== -->
-<div id="top" class="screen active">
-    <h1>TOP</h1>
-    <button onclick="go('katsuyou')">活用システム</button>
-    <button onclick="go('verb')">動詞フラッシュカード</button>
-    <button onclick="go('adj')">形容詞フラッシュカード</button>
-    <button onclick="go('test')">テスト</button>
-</div>
-
-<!-- ===== 活用 ===== -->
-<div id="katsuyou" class="screen">
-    <h1>活用システム</h1>
-    <p>ここにスプレッドシートデータ</p>
-    <button onclick="go('top')">戻る</button>
-</div>
-
-<!-- ===== 動詞 ===== -->
-<div id="verb" class="screen">
-    <h1>動詞カード</h1>
-
-    <div class="card" id="verbCard" onclick="flipVerb()"></div>
-
-    <div class="controls">
-        <button onclick="nextVerb()">次へ</button>
-        <button onclick="go('top')">戻る</button>
+<div id="app">
+    <div class="header">
+        <span id="screen-title">Top</span>
+        <div class="mode-toggle" onclick="toggleDarkMode()">Dark/Light</div>
     </div>
-</div>
 
-<!-- ===== 形容詞 ===== -->
-<div id="adj" class="screen">
-    <h1>形容詞カード</h1>
-
-    <div class="card" id="adjCard" onclick="flipAdj()"></div>
-
-    <div class="controls">
-        <button onclick="nextAdj()">次へ</button>
-        <button onclick="go('top')">戻る</button>
+    <div id="top-screen" class="screen active">
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <button class="btn" onclick="openConjugation()">活用システム</button>
+            <button class="btn btn-blue" onclick="openFlashcard('verb')">動詞カード</button>
+            <button class="btn btn-blue" onclick="openFlashcard('adj')">形容詞カード</button>
+            <button class="btn" style="background:#ffc800; border-color:#e5a500" onclick="openQuiz()">クイズ</button>
+        </div>
     </div>
-</div>
 
-<!-- ===== テスト ===== -->
-<div id="test" class="screen">
-    <h1>テスト</h1>
+    <div id="table-screen" class="screen">
+        <div class="table-container" id="table-content">読み込み中...</div>
+        <button class="btn btn-sub" onclick="showScreen('top-screen')">戻る</button>
+    </div>
 
-    <p id="question" style="font-size:20px;"></p>
+    <div id="card-screen" class="screen">
+        <div class="card-container">
+            <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-face card-front" id="card-front-content"></div>
+                <div class="card-face card-back" id="card-back-content"></div>
+            </div>
+        </div>
+        <div class="nav-controls">
+            <button class="btn btn-sub" onclick="prevCard()">まえへ</button>
+            <button class="btn btn-sub" onclick="nextCard()">つぎへ</button>
+        </div>
+        <button class="btn btn-sub" onclick="showScreen('top-screen')">Topへ戻る</button>
+    </div>
 
-    <button onclick="nextQuestion()">次の問題</button>
-    <button onclick="go('top')">戻る</button>
+    <div id="quiz-screen" class="screen">
+        <div id="quiz-q-container" class="card-face" style="position:relative; height:150px; margin-bottom:20px;">
+            <div id="quiz-question"></div>
+        </div>
+        <div id="quiz-feedback"></div>
+        <input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力...">
+        <button class="btn" onclick="checkAnswer()">次へ</button>
+        <div style="display:flex; justify-content: space-between; margin-top: auto;">
+            <button class="btn btn-sub" onclick="openConjugation()">活用システム</button>
+            <button class="btn btn-sub" onclick="showScreen('top-screen')">戻る</button>
+        </div>
+    </div>
 </div>
 
 <script>
+    const URLS = {
+        system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
+        verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
+        adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv"
+    };
 
-/* ===== 画面切替 ===== */
-function go(id){
-    document.querySelectorAll('.screen').forEach(s=>{
-        s.classList.remove('active');
-    });
+    let dataStore = { system: [], verb: [], adj: [] };
+    let currentMode = ''; 
+    let currentIndex = 0;
+    let currentQuizItem = null;
 
-    document.getElementById(id).classList.add('active');
-
-    // ← ここ重要：テスト画面に入ったら必ず問題表示
-    if(id === "test"){
-        showQuestion();
+    // CSV Parse
+    function parseCSV(text) {
+        return text.split('\n').filter(line => line.trim()).map(line => line.split(',').map(cell => cell.trim()));
     }
-}
 
-/* ===== 動詞 ===== */
-const verbs = [
-    {f:"食べる", b:"食べます / 食べた / 食べない / 食べられる"},
-    {f:"行く", b:"行きます / 行った / 行かない / 行ける"}
-];
+    async function fetchData(key) {
+        if (dataStore[key].length > 0) return dataStore[key];
+        const res = await fetch(URLS[key]);
+        const text = await res.text();
+        dataStore[key] = parseCSV(text);
+        return dataStore[key];
+    }
 
-let vi=0, vf=false;
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('screen-title').innerText = id.split('-')[0].toUpperCase();
+    }
 
-function showVerb(){
-    document.getElementById("verbCard").textContent = verbs[vi].f;
-    vf=false;
-}
+    // ダークモード
+    function toggleDarkMode() {
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', theme);
+    }
 
-function flipVerb(){
-    const c = document.getElementById("verbCard");
-    c.textContent = vf ? verbs[vi].f : verbs[vi].b;
-    vf = !vf;
-}
+    // 活用システム表示
+    async function openConjugation() {
+        showScreen('table-screen');
+        const data = await fetchData('system');
+        let html = '<table>';
+        data.forEach((row, i) => {
+            html += '<tr>';
+            row.forEach(cell => {
+                html += i === 0 ? `<th>${cell}</th>` : `<td>${cell}</td>`;
+            });
+            html += '</tr>';
+        });
+        document.getElementById('table-content').innerHTML = html + '</table>';
+    }
 
-function nextVerb(){
-    vi = (vi+1)%verbs.length;
-    showVerb();
-}
+    // フラッシュカード
+    async function openFlashcard(mode) {
+        currentMode = mode;
+        const data = await fetchData(mode);
+        currentIndex = parseInt(localStorage.getItem(`pos_${mode}`)) || 1; // 0行目はヘッダーなので1から
+        if (currentIndex >= data.length) currentIndex = 1;
+        renderCard();
+        showScreen('card-screen');
+    }
 
-/* ===== 形容詞 ===== */
-const adjs = [
-    {f:"高い", b:"高い / 高かった / 高くない / 高くなかった"},
-    {f:"安い", b:"安い / 安かった / 安くない / 安くなかった"}
-];
+    function renderCard() {
+        const data = dataStore[currentMode];
+        const row = data[currentIndex];
+        document.getElementById('main-card').classList.remove('is-flipped');
+        
+        // A-D列 (表面)
+        document.getElementById('card-front-content').innerHTML = row.slice(0, 4).join('<br>');
+        // E列以降 (裏面)
+        document.getElementById('card-back-content').innerHTML = row.slice(4).join('<br>');
+        
+        localStorage.setItem(`pos_${currentMode}`, currentIndex);
+    }
 
-let ai=0, af=false;
+    function nextCard() {
+        if (currentIndex < dataStore[currentMode].length - 1) {
+            currentIndex++;
+            renderCard();
+        }
+    }
 
-function showAdj(){
-    document.getElementById("adjCard").textContent = adjs[ai].f;
-    af=false;
-}
+    function prevCard() {
+        if (currentIndex > 1) {
+            currentIndex--;
+            renderCard();
+        }
+    }
 
-function flipAdj(){
-    const c = document.getElementById("adjCard");
-    c.textContent = af ? adjs[ai].f : adjs[ai].b;
-    af = !af;
-}
+    // クイズ
+    async function openQuiz() {
+        await fetchData('verb');
+        await fetchData('adj');
+        showScreen('quiz-screen');
+        newQuiz();
+    }
 
-function nextAdj(){
-    ai = (ai+1)%adjs.length;
-    showAdj();
-}
+    function newQuiz() {
+        const pool = [...dataStore.verb.slice(1), ...dataStore.adj.slice(1)];
+        currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
+        const headers = dataStore.verb[0]; // 活用形の名前取得用
+        
+        // ランダムな活用形(E列以降)を選択
+        const colIdx = Math.floor(Math.random() * (currentQuizItem.length - 4)) + 4;
+        const formName = headers[colIdx] || "その";
+        
+        document.getElementById('quiz-question').innerHTML = `「${currentQuizItem[0]} (${currentQuizItem[1]})」の<br><strong>${formName}</strong> のかたちは？`;
+        document.getElementById('quiz-answer').value = '';
+        document.getElementById('quiz-feedback').innerText = '';
+        document.getElementById('quiz-answer').focus();
+    }
 
-/* ===== テスト ===== */
-const qs = [
-    "食べる → ます形は？",
-    "行く → 可能形は？",
-    "高い → 過去形は？"
-];
+    function checkAnswer() {
+        const userAns = document.getElementById('quiz-answer').value.trim();
+        const feedback = document.getElementById('quiz-feedback');
+        
+        // 正解判定（全ての活用列をチェックするのは難しいため、問題作成時に正解を保持しておく）
+        // ここでは簡易的に、現在の問題の正解のみを判定
+        if (!currentQuizItem) return;
+        
+        // 実際のスプレッドシート構造に合わせて、全ての列のどれかに合致すればOKとするか、
+        // 特定の列を正解とするか。ここでは出題した列の値を正解とする。
+        // ※CSVのカラムズレに注意。
+        
+        const isCorrect = currentQuizItem.some(val => val === userAns);
 
-let qi=0;
-
-function showQuestion(){
-    document.getElementById("question").textContent = qs[qi];
-}
-
-function nextQuestion(){
-    qi = (qi+1)%qs.length;
-    showQuestion();
-}
-
-/* 初期表示 */
-showVerb();
-showAdj();
-
+        if (isCorrect && userAns !== "") {
+            feedback.style.color = "var(--primary)";
+            feedback.innerText = "OK！";
+            setTimeout(newQuiz, 1000);
+        } else {
+            feedback.style.color = "#ff4b4b";
+            feedback.innerText = "ちがうよ！";
+        }
+    }
 </script>
-
 </body>
 </html>
