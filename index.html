@@ -4,83 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>日本語活用アプリ</title>
-<link rel="stylesheet" href="style.css">
-</head>
 
-<body>
-
-<button id="darkToggle">🌙</button>
-
-<!-- TOP -->
-<div id="top" class="screen active">
-<h1>日本語活用アプリ</h1>
-
-<button onclick="loadSystem()">活用システム</button>
-<button onclick="startCards('verb')">動詞</button>
-<button onclick="startCards('adj')">形容詞</button>
-<button onclick="startQuiz()">クイズ</button>
-<button onclick="startReview()">復習モード</button>
-</div>
-
-<!-- SYSTEM -->
-<div id="system" class="screen">
-<h2>活用システム</h2>
-<div class="table-wrap" id="table"></div>
-<button onclick="goTop()">戻る</button>
-</div>
-
-<!-- CARD -->
-<div id="cardScreen" class="screen">
-<h2 id="cardTitle"></h2>
-
-<div class="card-container" onclick="flipCard()">
-    <div class="card-inner" id="cardInner">
-        <div class="card-face card-front" id="cardFront"></div>
-        <div class="card-face card-back" id="cardBack"></div>
-    </div>
-</div>
-
-<button onclick="prevCard()">まえへ</button>
-<button onclick="nextCard()">つぎへ</button>
-<button onclick="goTop()">戻る</button>
-</div>
-
-<!-- QUIZ -->
-<div id="quiz" class="screen">
-<h2 id="qText"></h2>
-
-<input id="answer" placeholder="入力">
-<button onclick="checkAnswer()">回答</button>
-
-<p id="result"></p>
-
-<div class="stats">
-スコア: <span id="score">0</span> |
-コンボ: <span id="combo">0</span> |
-ベスト: <span id="best">0</span>
-</div>
-
-<button onclick="loadSystem()">活用システム</button>
-<button onclick="goTop()">戻る</button>
-</div>
-
-<script src="app.js"></script>
-</body>
-</html>
-
+<style>
 :root {
     --bg:#f5f7fb;
     --card:#fff;
     --text:#222;
     --accent:#58cc02;
 }
-
 body.dark {
     --bg:#121212;
     --card:#1e1e1e;
     --text:#fff;
 }
-
 body {
     margin:0;
     font-family:sans-serif;
@@ -92,7 +28,6 @@ body {
     -webkit-user-select:none;
     touch-action:manipulation;
 }
-
 .screen { display:none; padding:20px; }
 .active { display:block; }
 
@@ -112,13 +47,12 @@ button {
     right:10px;
 }
 
-/* table */
 .table-wrap {
     overflow:auto;
     max-height:80vh;
 }
 
-/* card */
+/* カード */
 .card-container {
     perspective:1000px;
     width:90%;
@@ -126,18 +60,15 @@ button {
     height:250px;
     margin:20px auto;
 }
-
 .card-inner {
     transition:transform 0.6s;
     transform-style:preserve-3d;
     width:100%;
     height:100%;
 }
-
 .card-inner.flip {
     transform:rotateY(180deg);
 }
-
 .card-face {
     position:absolute;
     width:100%;
@@ -151,15 +82,11 @@ button {
     background:var(--card);
     backface-visibility:hidden;
 }
-
 .card-back {
     transform:rotateY(180deg);
 }
 
-.stats {
-    margin-top:10px;
-    font-size:18px;
-}
+.stats { margin-top:10px; }
 
 input {
     padding:10px;
@@ -167,11 +94,69 @@ input {
     width:80%;
     border-radius:10px;
 }
+</style>
+</head>
 
-const URLS = {
- system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
- verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
- adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv"
+<body>
+
+<button id="darkToggle">🌙</button>
+
+<div id="top" class="screen active">
+<h1>日本語活用アプリ</h1>
+<button onclick="loadSystem()">活用システム</button>
+<button onclick="startCards('verb')">動詞</button>
+<button onclick="startCards('adj')">形容詞</button>
+<button onclick="startQuiz()">クイズ</button>
+<button onclick="startReview()">復習モード</button>
+</div>
+
+<div id="system" class="screen">
+<h2>活用システム</h2>
+<div class="table-wrap" id="table"></div>
+<button onclick="goTop()">戻る</button>
+</div>
+
+<div id="cardScreen" class="screen">
+<h2 id="cardTitle"></h2>
+
+<div class="card-container" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+        <div class="card-face" id="cardFront"></div>
+        <div class="card-face card-back" id="cardBack"></div>
+    </div>
+</div>
+
+<button onclick="prevCard()">まえへ</button>
+<button onclick="nextCard()">つぎへ</button>
+<button onclick="goTop()">戻る</button>
+</div>
+
+<div id="quiz" class="screen">
+<h2 id="qText"></h2>
+
+<input id="answer">
+<button onclick="checkAnswer()">回答</button>
+
+<p id="result"></p>
+
+<div class="stats">
+スコア: <span id="score">0</span> |
+コンボ: <span id="combo">0</span> |
+ベスト: <span id="best">0</span>
+</div>
+
+<button onclick="loadSystem()">活用システム</button>
+<button onclick="goTop()">戻る</button>
+</div>
+
+<script>
+// ===== 初期化（重要）=====
+window.onload = () => {
+
+document.getElementById("darkToggle").onclick = ()=>{
+ document.body.classList.toggle("dark");
+};
+
 };
 
 // ===== 共通 =====
@@ -179,23 +164,23 @@ function show(id){
  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
  document.getElementById(id).classList.add('active');
 }
-
 function goTop(){ show('top'); }
 
 function parseCSV(text){
  return text.split("\n").map(r=>r.split(","));
 }
 
-// ===== ダークモード =====
-document.getElementById("darkToggle").onclick = ()=>{
- document.body.classList.toggle("dark");
+// ===== URL =====
+const URLS = {
+ system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
+ verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
+ adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv"
 };
 
 // ===== SYSTEM =====
 async function loadSystem(){
  show('system');
- let res = await fetch(URLS.system);
- let data = parseCSV(await res.text());
+ let data = parseCSV(await (await fetch(URLS.system)).text());
 
  let html="<table border=1>";
  data.forEach(r=>{
@@ -203,44 +188,42 @@ async function loadSystem(){
  });
  html+="</table>";
 
- document.getElementById("table").innerHTML=html;
+ table.innerHTML=html;
 }
 
 // ===== CARD =====
-let cards=[], index=0, type="", flipped=false;
+let cards=[], index=0, type="";
 
 async function startCards(t){
  type=t;
  show('cardScreen');
 
- let res = await fetch(URLS[t]);
- cards = parseCSV(await res.text());
-
+ cards = parseCSV(await (await fetch(URLS[t])).text());
  index = Number(localStorage.getItem(t+"_index"))||0;
  renderCard();
 }
 
 function renderCard(){
  let c = cards[index];
- document.getElementById("cardFront").innerHTML = c.slice(0,4).join("<br>");
- document.getElementById("cardBack").innerHTML = c.slice(4).join("<br>");
+ cardFront.innerHTML = c.slice(0,4).join("<br>");
+ cardBack.innerHTML = c.slice(4).join("<br>");
 }
 
 function flipCard(){
- document.getElementById("cardInner").classList.toggle("flip");
+ cardInner.classList.toggle("flip");
 }
 
 function nextCard(){
  index=(index+1)%cards.length;
  localStorage.setItem(type+"_index",index);
- document.getElementById("cardInner").classList.remove("flip");
+ cardInner.classList.remove("flip");
  renderCard();
 }
 
 function prevCard(){
  index=(index-1+cards.length)%cards.length;
  localStorage.setItem(type+"_index",index);
- document.getElementById("cardInner").classList.remove("flip");
+ cardInner.classList.remove("flip");
  renderCard();
 }
 
@@ -253,9 +236,7 @@ let reviewMode=false;
 async function startQuiz(){
  show('quiz');
  reviewMode=false;
-
- score=0; combo=0;
- updateUI();
+ score=0; combo=0; updateUI();
 
  let [v,a] = await Promise.all([
   fetch(URLS.verb).then(r=>r.text()),
@@ -267,11 +248,7 @@ async function startQuiz(){
 }
 
 function startReview(){
- if(wrongList.length===0){
-  alert("苦手問題なし");
-  return;
- }
-
+ if(wrongList.length===0){ alert("苦手なし"); return; }
  reviewMode=true;
  show('quiz');
  quizData=wrongList.map(q=>q.split("|"));
@@ -287,11 +264,9 @@ function nextQuestion(){
 
  currentQ = quizData[Math.floor(Math.random()*quizData.length)];
 
- document.getElementById("qText").innerText =
- `${currentQ[0]} の ${currentQ[1]} のかたちは？`;
-
- document.getElementById("answer").value="";
- document.getElementById("result").innerText="";
+ qText.innerText = `${currentQ[0]} の ${currentQ[1]} のかたちは？`;
+ answer.value="";
+ result.innerText="";
 }
 
 function normalize(s){ return s.replace(/\s/g,""); }
@@ -310,7 +285,7 @@ function checkAnswer(){
    localStorage.setItem("wrongList",JSON.stringify(wrongList));
   }
 
-  showFeedback("OK！","green");
+  result.innerText="OK！";
 
  }else{
   combo=0;
@@ -321,16 +296,11 @@ function checkAnswer(){
    localStorage.setItem("wrongList",JSON.stringify(wrongList));
   }
 
-  showFeedback("ちがうよ！","red");
+  result.innerText="ちがうよ！";
  }
 
  updateUI();
  setTimeout(nextQuestion,800);
-}
-
-function showFeedback(t,c){
- result.innerText=t;
- result.style.color=c;
 }
 
 function updateUI(){
@@ -339,15 +309,10 @@ function updateUI(){
  bestEl.innerText=bestCombo;
 }
 
-// Enter対応
 answer.addEventListener("keydown",e=>{
  if(e.key==="Enter") checkAnswer();
 });
+</script>
 
-// ズーム防止
-let lastTouchEnd=0;
-document.addEventListener('touchend',e=>{
- let now=new Date().getTime();
- if(now-lastTouchEnd<=300) e.preventDefault();
- lastTouchEnd=now;
-},false);
+</body>
+</html>
