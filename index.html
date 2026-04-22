@@ -2,215 +2,68 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<!-- ✅ 追加：PapaParse -->
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<title>J-Learning Master Pro v4</title>
-<style>
-/* ここは変更なし（省略せずそのまま使ってOK） */
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>日本語活用アプリ</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- ===== ここも変更なし ===== -->
+<button id="darkToggle">🌙</button>
 
-<nav>
-<button class="btn-home" onclick="location.reload()">HOME</button>
-<div id="status" style="font-size: 10px; font-weight: 900; letter-spacing: 1px;">SYNCING...</div>
-<button class="btn-home" onclick="document.body.classList.toggle('dark')">DARK</button>
-</nav>
+<!-- TOP -->
+<div id="top" class="screen active">
+<h1>日本語活用アプリ</h1>
 
-<div id="scr-top" class="screen active">
-<h1 class="menu-title">J-LEARNING<br>MASTER</h1>
-<button class="btn-menu all-color" id="btn-rules" onclick="showAllRules()" disabled>活用のすべて (読込中...)</button>
-<button class="btn-menu v-color" id="btn-v" onclick="startMode('verb')" disabled>動詞 (読込中...)</button>
-<button class="btn-menu a-color" id="btn-a" onclick="startMode('adj')" disabled>形容詞 (読込中...)</button>
-<button class="btn-menu q-color" id="btn-q" onclick="startMode('quiz')" disabled>混合クイズ</button>
+<button onclick="loadSystem()">活用システム</button>
+<button onclick="startCards('verb')">動詞</button>
+<button onclick="startCards('adj')">形容詞</button>
+<button onclick="startQuiz()">クイズ</button>
+<button onclick="startReview()">復習モード</button>
 </div>
 
-<div id="scr-all-rules" class="screen">
-<h2 class="menu-title" style="font-size: 1.4rem;">動詞活用のルール</h2>
-<div id="rules-container" style="width: 100%; max-width: 600px; overflow-x: auto;"></div>
-<div class="controls" style="margin-top: 20px;">
-<button class="btn-ctrl" style="background: var(--sub);" onclick="showScreen('scr-top')">戻る</button>
-</div>
-</div>
-
-<!-- ✅ 重複していた scr-quiz を1つに統一 -->
-<div id="scr-quiz" class="screen">
-<div class="quiz-box">
-<div id="q-word">--</div>
-<div id="q-yomi">--</div>
-<div>の <b id="q-form">--</b> は？</div>
-<input type="text" id="q-input" class="q-input">
-<div id="q-feedback"></div>
-</div>
-<div class="controls">
-<button class="btn-ctrl" onclick="checkQuiz()">回答</button>
-<button class="btn-ctrl" onclick="nextQuiz()">スキップ</button>
-</div>
+<!-- SYSTEM -->
+<div id="system" class="screen">
+<h2>活用システム</h2>
+<div class="table-wrap" id="table"></div>
+<button onclick="goTop()">戻る</button>
 </div>
 
-<script>
+<!-- CARD -->
+<div id="cardScreen" class="screen">
+<h2 id="cardTitle"></h2>
 
-// ===== CSV =====
-const VERB_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv'; 
-const ADJ_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv';
-const RULES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv';
+<div class="card-container" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+        <div class="card-face card-front" id="cardFront"></div>
+        <div class="card-face card-back" id="cardBack"></div>
+    </div>
+</div>
 
-let verbs = [], adjs = [], rulesData = [];
-let vHeaders = [], aHeaders = [];
-let currentList = [], currentHeaders = [], currentIndex = 0;
-let quizAns = "";
+<button onclick="prevCard()">まえへ</button>
+<button onclick="nextCard()">つぎへ</button>
+<button onclick="goTop()">戻る</button>
+</div>
 
-// ===== ✅ 追加：正規化 =====
-function normalize(str) {
-    return (str || "").trim().replace(/\s+/g, "");
-}
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+<h2 id="qText"></h2>
 
-// ===== ✅ CSV読み込み改善 =====
-async function loadData(url) {
-    const res = await fetch(url + '&v=' + Date.now());
-    const text = await res.text();
-    return Papa.parse(text).data;
-}
+<input id="answer" placeholder="入力">
+<button onclick="checkAnswer()">回答</button>
 
-// ===== INIT =====
-async function init() {
-    try {
-        const [vData, aData, rData] = await Promise.all([
-            loadData(VERB_CSV_URL),
-            loadData(ADJ_CSV_URL),
-            loadData(RULES_CSV_URL)
-        ]);
+<p id="result"></p>
 
-        vHeaders = vData[0];
-        verbs = vData.slice(1);
+<div class="stats">
+スコア: <span id="score">0</span> |
+コンボ: <span id="combo">0</span> |
+ベスト: <span id="best">0</span>
+</div>
 
-        aHeaders = aData[0];
-        adjs = aData.slice(1);
+<button onclick="loadSystem()">活用システム</button>
+<button onclick="goTop()">戻る</button>
+</div>
 
-        rulesData = rData;
-
-        document.getElementById('btn-v').disabled = false;
-        document.getElementById('btn-a').disabled = false;
-        document.getElementById('btn-rules').disabled = false;
-        document.getElementById('btn-q').disabled = false;
-
-        document.getElementById('status').innerText = "ONLINE";
-
-    } catch (e) {
-        console.error(e);
-        document.getElementById('status').innerText = "ERROR";
-    }
-}
-
-// ===== 画面 =====
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
-
-// ===== ルール =====
-function showAllRules() {
-    const container = document.getElementById('rules-container');
-    let html = '<table class="rules-table">';
-    rulesData.forEach((row, i) => {
-        html += "<tr>";
-        row.forEach(c => {
-            html += i === 0 ? `<th>${c}</th>` : `<td>${c}</td>`;
-        });
-        html += "</tr>";
-    });
-    html += "</table>";
-    container.innerHTML = html;
-    showScreen('scr-all-rules');
-}
-
-// ===== モード =====
-function startMode(mode) {
-    currentIndex = 0;
-    if (mode === 'verb') { currentList = verbs; currentHeaders = vHeaders; }
-    if (mode === 'adj') { currentList = adjs; currentHeaders = aHeaders; }
-    if (mode === 'quiz') { nextQuiz(); showScreen('scr-quiz'); return; }
-    updateCard();
-}
-
-// ===== ✅ 修正：カード =====
-function updateCard() {
-    const d = currentList[currentIndex];
-
-    let html = "";
-
-    for (let i = 0; i < currentHeaders.length; i++) {
-        const raw = currentHeaders[i];
-        const label = normalize(raw);
-        const val = d[i];
-
-        if (!val) continue;
-        if (["グループ","英語","ベトナム語"].includes(label)) continue;
-
-        if (label.includes("活用")) {
-            console.log("活用OK:", raw, val);
-        }
-
-        if (i >= 4) {
-            html += `<div>${raw} : ${val}</div>`;
-        }
-    }
-
-    document.getElementById('rules-container').innerHTML = html;
-}
-
-// ===== ✅ 修正：クイズ =====
-function nextQuiz() {
-    const isVerb = Math.random() > 0.5;
-    const list = isVerb ? verbs : adjs;
-    const heads = isVerb ? vHeaders : aHeaders;
-
-    const item = list[Math.floor(Math.random() * list.length)];
-
-    const cols = [];
-
-    for (let i = 0; i < heads.length; i++) {
-        const label = normalize(heads[i]);
-
-        if (!item[i]) continue;
-        if (["グループ","英語","ベトナム語"].includes(label)) continue;
-
-        if (i >= 4) cols.push(i);
-    }
-
-    const col = cols[Math.floor(Math.random() * cols.length)];
-
-    document.getElementById('q-word').innerText = item[0];
-    document.getElementById('q-yomi').innerText = item[1];
-    document.getElementById('q-form').innerText = heads[col];
-
-    quizAns = item[col];
-
-    document.getElementById('q-input').value = "";
-    document.getElementById('q-feedback').innerText = "";
-}
-
-// ===== チェック =====
-function checkQuiz() {
-    const input = document.getElementById('q-input').value.trim();
-    const f = document.getElementById('q-feedback');
-
-    if (input === quizAns) {
-        f.innerText = "正解！";
-        setTimeout(nextQuiz, 800);
-    } else {
-        f.innerText = "答え: " + quizAns;
-    }
-}
-
-init();
-
-</script>
+<script src="app.js"></script>
 </body>
 </html>
