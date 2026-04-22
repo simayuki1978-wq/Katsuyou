@@ -25,13 +25,15 @@ body {
     text-align:center;
 }
 
-/* TOPボタン縦並び */
+.screen { display:none; padding:20px; }
+.active { display:block; }
+
+/* TOP縦並び */
 #top {
     display:flex;
     flex-direction:column;
     align-items:center;
 }
-
 #top button {
     width:80%;
     max-width:300px;
@@ -46,9 +48,6 @@ button {
     background:var(--accent);
     color:white;
 }
-
-.screen { display:none; padding:20px; }
-.active { display:block; }
 
 #darkToggle {
     position:fixed;
@@ -76,9 +75,8 @@ button {
     width:100%;
     height:100%;
 }
-.card-inner.flip {
-    transform:rotateY(180deg);
-}
+.card-inner.flip { transform:rotateY(180deg); }
+
 .card-face {
     position:absolute;
     width:100%;
@@ -92,19 +90,13 @@ button {
     background:var(--card);
     backface-visibility:hidden;
 }
-.card-back {
-    transform:rotateY(180deg);
-}
+.card-back { transform:rotateY(180deg); }
 
 input {
     padding:10px;
     font-size:18px;
     width:80%;
     border-radius:10px;
-}
-
-.stats {
-    margin-top:10px;
 }
 </style>
 </head>
@@ -132,7 +124,7 @@ input {
 
 <!-- CARD -->
 <div id="cardScreen" class="screen">
-<h2 id="cardTitle"></h2>
+<h2>フラッシュカード</h2>
 
 <div class="card-container" onclick="flipCard()">
     <div class="card-inner" id="cardInner">
@@ -155,10 +147,10 @@ input {
 
 <p id="result"></p>
 
-<div class="stats">
-スコア: <span id="score">0</span> |
-コンボ: <span id="combo">0</span> |
-ベスト: <span id="best">0</span>
+<div>
+スコア:<span id="score">0</span> |
+コンボ:<span id="combo">0</span> |
+ベスト:<span id="best">0</span>
 </div>
 
 <button onclick="loadSystem()">活用システム</button>
@@ -166,40 +158,38 @@ input {
 </div>
 
 <script>
-// ===== 共通 =====
+// ===== 画面切替 =====
 function show(id){
  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
  document.getElementById(id).classList.add('active');
 }
 function goTop(){ show('top'); }
 
-// CSV安定パース
+// ===== CSV =====
 function parseCSV(text){
- return text
-   .trim()
-   .split("\n")
-   .map(r => r.split(","))
-   .filter(r => r.length > 1 && r[0] !== "");
+ return text.trim().split("\n")
+   .map(r=>r.split(","))
+   .filter(r=>r.length>1);
 }
 
-// URL
+// ===== URL =====
 const URLS = {
- system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
- verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
- adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv"
+ system:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&output=csv",
+ verb:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&output=csv",
+ adj:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&output=csv"
 };
 
-// ダークモード
-darkToggle.onclick = ()=>document.body.classList.toggle("dark");
+// ===== ダークモード =====
+darkToggle.onclick=()=>document.body.classList.toggle("dark");
 
-// ===== SYSTEM =====
+// ===== SYSTEM（A〜F列のみ）=====
 async function loadSystem(){
  show('system');
- let data = parseCSV(await (await fetch(URLS.system)).text());
+ let data=parseCSV(await (await fetch(URLS.system)).text());
 
  let html="<table border=1>";
  data.forEach(r=>{
-  html+="<tr>"+r.map(c=>`<td>${c}</td>`).join("")+"</tr>";
+  html+="<tr>"+r.slice(0,6).map(c=>`<td>${c}</td>`).join("")+"</tr>";
  });
  html+="</table>";
 
@@ -207,67 +197,46 @@ async function loadSystem(){
 }
 
 // ===== CARD =====
-let cards=[], index=0, type="";
+let cards=[],index=0,type="";
 
 async function startCards(t){
  type=t;
  show('cardScreen');
 
- let text = await (await fetch(URLS[t])).text();
- cards = parseCSV(text);
-
- index = Number(localStorage.getItem(t+"_index")) || 0;
- if(index >= cards.length) index = 0;
-
- cardInner.classList.remove("flip");
-
+ cards=parseCSV(await (await fetch(URLS[t])).text());
+ index=0;
  renderCard();
 }
 
 function renderCard(){
- if (!cards.length) {
-  cardFront.innerHTML = "データなし";
-  cardBack.innerHTML = "";
-  return;
- }
+ let c=cards[index];
+ if(!c) return;
 
- let c = cards[index];
- if (!c) return;
-
- cardFront.innerHTML = c.slice(0,4).join("<br>") || "（表なし）";
- cardBack.innerHTML = c.slice(4).join("<br>") || "（裏なし）";
+ cardFront.innerHTML=c.slice(0,4).join("<br>");
+ cardBack.innerHTML=c.slice(4).join("<br>");
 }
 
-function flipCard(){
- cardInner.classList.toggle("flip");
-}
+function flipCard(){ cardInner.classList.toggle("flip"); }
 
 function nextCard(){
  index=(index+1)%cards.length;
- localStorage.setItem(type+"_index",index);
  cardInner.classList.remove("flip");
  renderCard();
 }
 
 function prevCard(){
  index=(index-1+cards.length)%cards.length;
- localStorage.setItem(type+"_index",index);
  cardInner.classList.remove("flip");
  renderCard();
 }
 
 // ===== QUIZ =====
-let quizData=[], currentQ;
-let score=0, combo=0, bestCombo=0;
-let wrongList = JSON.parse(localStorage.getItem("wrongList")||"[]");
-let reviewMode=false;
+let quizData=[],currentQ;
 
 async function startQuiz(){
  show('quiz');
- reviewMode=false;
- score=0; combo=0; updateUI();
 
- let [v,a] = await Promise.all([
+ let [v,a]=await Promise.all([
   fetch(URLS.verb).then(r=>r.text()),
   fetch(URLS.adj).then(r=>r.text())
  ]);
@@ -276,73 +245,25 @@ async function startQuiz(){
  nextQuestion();
 }
 
-function startReview(){
- if(!wrongList.length){
-  alert("苦手なし 👍");
-  return;
- }
- reviewMode=true;
- show('quiz');
- quizData=wrongList.map(q=>q.split("|"));
- nextQuestion();
-}
-
 function nextQuestion(){
- if(reviewMode && wrongList.length===0){
-  alert("克服！");
-  goTop();
-  return;
- }
-
- currentQ = quizData[Math.floor(Math.random()*quizData.length)];
-
- qText.innerText = `${currentQ[0]} の ${currentQ[1]} のかたちは？`;
+ currentQ=quizData[Math.floor(Math.random()*quizData.length)];
+ qText.innerText=`${currentQ[0]} の ${currentQ[1]} のかたちは？`;
  answer.value="";
  result.innerText="";
 }
 
-function normalize(s){ return s.replace(/\s/g,""); }
-
 function checkAnswer(){
- let ans = normalize(answer.value);
- let correct = currentQ.slice(4).join("");
+ let ans=answer.value.trim();
+ let correct=currentQ.slice(4).join("");
 
  if(correct.includes(ans)){
-  score+=10+combo*2;
-  combo++;
-  if(combo>bestCombo) bestCombo=combo;
-
-  if(reviewMode){
-   wrongList=wrongList.filter(q=>q!==currentQ.join("|"));
-   localStorage.setItem("wrongList",JSON.stringify(wrongList));
-  }
-
   result.innerText="OK！";
  }else{
-  combo=0;
-  score=Math.max(0,score-5);
-
-  if(!wrongList.includes(currentQ.join("|"))){
-   wrongList.push(currentQ.join("|"));
-   localStorage.setItem("wrongList",JSON.stringify(wrongList));
-  }
-
   result.innerText="ちがうよ！";
  }
 
- updateUI();
  setTimeout(nextQuestion,800);
 }
-
-function updateUI(){
- score.innerText=score;
- combo.innerText=combo;
- best.innerText=bestCombo;
-}
-
-answer.addEventListener("keydown",e=>{
- if(e.key==="Enter") checkAnswer();
-});
 </script>
 
 </body>
