@@ -2,268 +2,212 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>日本語活用アプリ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本語学習システム</title>
 
 <style>
-:root {
-    --bg:#f5f7fb;
-    --card:#fff;
-    --text:#222;
-    --accent:#58cc02;
-}
-body.dark {
-    --bg:#121212;
-    --card:#1e1e1e;
-    --text:#fff;
-}
 body {
-    margin:0;
-    font-family:sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    text-align:center;
+    margin: 0;
+    font-family: Arial;
 }
 
-.screen { display:none; padding:20px; }
-.active { display:block; }
+/* ===== 画面制御 ===== */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
 
-/* TOP縦並び */
-#top {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-#top button {
-    width:80%;
-    max-width:300px;
+    display: none;
+    overflow-y: auto;
+
+    background: #fff;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
+.active {
+    display: block;
+    z-index: 10;
+}
+
+/* ===== ボタン ===== */
 button {
-    padding:15px;
-    margin:10px;
-    border:none;
-    border-radius:15px;
-    font-size:18px;
-    background:var(--accent);
-    color:white;
+    display: block;
+    margin: 10px auto;
+    padding: 12px 20px;
+    font-size: 16px;
 }
 
-#darkToggle {
-    position:fixed;
-    top:10px;
-    right:10px;
+/* ===== フラッシュカード ===== */
+.card {
+    max-width: 400px;
+    min-height: 120px;
+    margin: 40px auto;
+    padding: 20px;
+
+    border: 2px solid #333;
+    font-size: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    cursor: pointer;
+
+    /* ← ここ重要（重なり防止） */
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
-/* テーブル */
-.table-wrap {
-    overflow:auto;
-    max-height:80vh;
-}
-
-/* カード */
-.card-container {
-    perspective:1000px;
-    width:90%;
-    max-width:400px;
-    height:250px;
-    margin:20px auto;
-}
-.card-inner {
-    transition:transform 0.6s;
-    transform-style:preserve-3d;
-    width:100%;
-    height:100%;
-}
-.card-inner.flip { transform:rotateY(180deg); }
-
-.card-face {
-    position:absolute;
-    width:100%;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    font-size:22px;
-    border-radius:20px;
-    background:var(--card);
-    backface-visibility:hidden;
-}
-.card-back { transform:rotateY(180deg); }
-
-input {
-    padding:10px;
-    font-size:18px;
-    width:80%;
-    border-radius:10px;
+/* 下のボタンとの距離確保 */
+.controls {
+    margin-top: 30px;
 }
 </style>
 </head>
 
 <body>
 
-<button id="darkToggle">🌙</button>
-
-<!-- TOP -->
+<!-- ===== TOP ===== -->
 <div id="top" class="screen active">
-<h1>日本語活用アプリ</h1>
-<button onclick="loadSystem()">活用システム</button>
-<button onclick="startCards('verb')">動詞</button>
-<button onclick="startCards('adj')">形容詞</button>
-<button onclick="startQuiz()">クイズ</button>
-<button onclick="startReview()">復習モード</button>
+    <h1>TOP</h1>
+    <button onclick="go('katsuyou')">活用システム</button>
+    <button onclick="go('verb')">動詞フラッシュカード</button>
+    <button onclick="go('adj')">形容詞フラッシュカード</button>
+    <button onclick="go('test')">テスト</button>
 </div>
 
-<!-- SYSTEM -->
-<div id="system" class="screen">
-<h2>活用システム</h2>
-<div class="table-wrap" id="table"></div>
-<button onclick="goTop()">戻る</button>
+<!-- ===== 活用 ===== -->
+<div id="katsuyou" class="screen">
+    <h1>活用システム</h1>
+    <p>ここにスプレッドシートデータ</p>
+    <button onclick="go('top')">戻る</button>
 </div>
 
-<!-- CARD -->
-<div id="cardScreen" class="screen">
-<h2>フラッシュカード</h2>
+<!-- ===== 動詞 ===== -->
+<div id="verb" class="screen">
+    <h1>動詞カード</h1>
 
-<div class="card-container" onclick="flipCard()">
-    <div class="card-inner" id="cardInner">
-        <div class="card-face" id="cardFront"></div>
-        <div class="card-face card-back" id="cardBack"></div>
+    <div class="card" id="verbCard" onclick="flipVerb()"></div>
+
+    <div class="controls">
+        <button onclick="nextVerb()">次へ</button>
+        <button onclick="go('top')">戻る</button>
     </div>
 </div>
 
-<button onclick="prevCard()">まえへ</button>
-<button onclick="nextCard()">つぎへ</button>
-<button onclick="goTop()">戻る</button>
+<!-- ===== 形容詞 ===== -->
+<div id="adj" class="screen">
+    <h1>形容詞カード</h1>
+
+    <div class="card" id="adjCard" onclick="flipAdj()"></div>
+
+    <div class="controls">
+        <button onclick="nextAdj()">次へ</button>
+        <button onclick="go('top')">戻る</button>
+    </div>
 </div>
 
-<!-- QUIZ -->
-<div id="quiz" class="screen">
-<h2 id="qText"></h2>
+<!-- ===== テスト ===== -->
+<div id="test" class="screen">
+    <h1>テスト</h1>
 
-<input id="answer">
-<button onclick="checkAnswer()">回答</button>
+    <p id="question" style="font-size:20px;"></p>
 
-<p id="result"></p>
-
-<div>
-スコア:<span id="score">0</span> |
-コンボ:<span id="combo">0</span> |
-ベスト:<span id="best">0</span>
-</div>
-
-<button onclick="loadSystem()">活用システム</button>
-<button onclick="goTop()">戻る</button>
+    <button onclick="nextQuestion()">次の問題</button>
+    <button onclick="go('top')">戻る</button>
 </div>
 
 <script>
-// ===== 画面切替 =====
-function show(id){
- document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
- document.getElementById(id).classList.add('active');
-}
-function goTop(){ show('top'); }
 
-// ===== CSV =====
-function parseCSV(text){
- return text.trim().split("\n")
-   .map(r=>r.split(","))
-   .filter(r=>r.length>1);
-}
+/* ===== 画面切替 ===== */
+function go(id){
+    document.querySelectorAll('.screen').forEach(s=>{
+        s.classList.remove('active');
+    });
 
-// ===== URL =====
-const URLS = {
- system:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&output=csv",
- verb:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&output=csv",
- adj:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&output=csv"
-};
+    document.getElementById(id).classList.add('active');
 
-// ===== ダークモード =====
-darkToggle.onclick=()=>document.body.classList.toggle("dark");
-
-// ===== SYSTEM（A〜F列のみ）=====
-async function loadSystem(){
- show('system');
- let data=parseCSV(await (await fetch(URLS.system)).text());
-
- let html="<table border=1>";
- data.forEach(r=>{
-  html+="<tr>"+r.slice(0,6).map(c=>`<td>${c}</td>`).join("")+"</tr>";
- });
- html+="</table>";
-
- table.innerHTML=html;
+    // ← ここ重要：テスト画面に入ったら必ず問題表示
+    if(id === "test"){
+        showQuestion();
+    }
 }
 
-// ===== CARD =====
-let cards=[],index=0,type="";
+/* ===== 動詞 ===== */
+const verbs = [
+    {f:"食べる", b:"食べます / 食べた / 食べない / 食べられる"},
+    {f:"行く", b:"行きます / 行った / 行かない / 行ける"}
+];
 
-async function startCards(t){
- type=t;
- show('cardScreen');
+let vi=0, vf=false;
 
- cards=parseCSV(await (await fetch(URLS[t])).text());
- index=0;
- renderCard();
+function showVerb(){
+    document.getElementById("verbCard").textContent = verbs[vi].f;
+    vf=false;
 }
 
-function renderCard(){
- let c=cards[index];
- if(!c) return;
-
- cardFront.innerHTML=c.slice(0,4).join("<br>");
- cardBack.innerHTML=c.slice(4).join("<br>");
+function flipVerb(){
+    const c = document.getElementById("verbCard");
+    c.textContent = vf ? verbs[vi].f : verbs[vi].b;
+    vf = !vf;
 }
 
-function flipCard(){ cardInner.classList.toggle("flip"); }
-
-function nextCard(){
- index=(index+1)%cards.length;
- cardInner.classList.remove("flip");
- renderCard();
+function nextVerb(){
+    vi = (vi+1)%verbs.length;
+    showVerb();
 }
 
-function prevCard(){
- index=(index-1+cards.length)%cards.length;
- cardInner.classList.remove("flip");
- renderCard();
+/* ===== 形容詞 ===== */
+const adjs = [
+    {f:"高い", b:"高い / 高かった / 高くない / 高くなかった"},
+    {f:"安い", b:"安い / 安かった / 安くない / 安くなかった"}
+];
+
+let ai=0, af=false;
+
+function showAdj(){
+    document.getElementById("adjCard").textContent = adjs[ai].f;
+    af=false;
 }
 
-// ===== QUIZ =====
-let quizData=[],currentQ;
+function flipAdj(){
+    const c = document.getElementById("adjCard");
+    c.textContent = af ? adjs[ai].f : adjs[ai].b;
+    af = !af;
+}
 
-async function startQuiz(){
- show('quiz');
+function nextAdj(){
+    ai = (ai+1)%adjs.length;
+    showAdj();
+}
 
- let [v,a]=await Promise.all([
-  fetch(URLS.verb).then(r=>r.text()),
-  fetch(URLS.adj).then(r=>r.text())
- ]);
+/* ===== テスト ===== */
+const qs = [
+    "食べる → ます形は？",
+    "行く → 可能形は？",
+    "高い → 過去形は？"
+];
 
- quizData=[...parseCSV(v),...parseCSV(a)];
- nextQuestion();
+let qi=0;
+
+function showQuestion(){
+    document.getElementById("question").textContent = qs[qi];
 }
 
 function nextQuestion(){
- currentQ=quizData[Math.floor(Math.random()*quizData.length)];
- qText.innerText=`${currentQ[0]} の ${currentQ[1]} のかたちは？`;
- answer.value="";
- result.innerText="";
+    qi = (qi+1)%qs.length;
+    showQuestion();
 }
 
-function checkAnswer(){
- let ans=answer.value.trim();
- let correct=currentQ.slice(4).join("");
+/* 初期表示 */
+showVerb();
+showAdj();
 
- if(correct.includes(ans)){
-  result.innerText="OK！";
- }else{
-  result.innerText="ちがうよ！";
- }
-
- setTimeout(nextQuestion,800);
-}
 </script>
 
 </body>
