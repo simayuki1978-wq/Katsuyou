@@ -82,14 +82,14 @@
     </div>
 
     <div id="top-screen" class="screen active">
-        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-            <button class="btn" onclick="openConjugation()">活用システム</button>
-            <button class="btn btn-blue" onclick="openFlashcard('verb')">動詞カード</button>
-            <button class="btn btn-blue" onclick="openFlashcard('adj')">形容詞カード</button>
-            <button class="btn" style="background:#ffc800; border-color:#e5a500" onclick="openQuiz()">クイズ</button>
-        </div>
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <button class="btn" onclick="openConjugation()">活用システム</button>
+        <button class="btn btn-blue" onclick="openFlashcard('verb')">動詞カード</button>
+        <button class="btn btn-blue" onclick="openFlashcard('adj')">形容詞カード</button>
+        <button class="btn btn-blue" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">例文カード</button> <button class="btn" style="background:#ffc800; border-color:#e5a500" onclick="openQuiz()">クイズ</button>
+      </div>
     </div>
-
+ 
     <div id="table-screen" class="screen">
         <div class="table-container" id="table-content">読み込み中...</div>
         <button class="btn btn-sub" onclick="showScreen('top-screen')">戻る</button>
@@ -125,12 +125,14 @@
 
 <script>
     const URLS = {
-        system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
-        verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
-        adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv"
+    system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
+    verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
+    adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv",
+    example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv" // 追加
     };
 
-    let dataStore = { system: [], verb: [], adj: [] };
+// dataStoreにも初期値を追加
+    let dataStore = { system: [], verb: [], adj: [], example: [] }; 
     let currentMode = ''; 
     let currentIndex = 0;
     let currentQuizItem = null;
