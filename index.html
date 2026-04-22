@@ -204,16 +204,31 @@
     }
 
     function renderCard() {
-        const data = dataStore[currentMode];
-        const row = data[currentIndex];
-        document.getElementById('main-card').classList.remove('is-flipped');
-        
-        // A-D列 (表面)
-        document.getElementById('card-front-content').innerHTML = row.slice(0, 4).join('<br>');
-        // E列以降 (裏面)
-        document.getElementById('card-back-content').innerHTML = row.slice(4).join('<br>');
-        
-        localStorage.setItem(`pos_${currentMode}`, currentIndex);
+      const data = dataStore[currentMode];
+      const row = data[currentIndex];
+      const cardElement = document.getElementById('main-card');
+      cardElement.classList.remove('is-flipped');
+    
+      let frontContent, backContent;
+
+      if (currentMode === 'example') {
+        // --- 例文カード専用の切り分け ---
+        // A-C列 (インデックス 0, 1, 2) が表面
+        frontContent = row.slice(0, 3).join('<br>');
+        // D列以降 (インデックス 3〜) が裏面
+        backContent = row.slice(3).join('<br>');
+      } else {
+        // --- 動詞・形容詞カード (従来通り) ---
+        // A-D列 (インデックス 0, 1, 2, 3) が表面
+        frontContent = row.slice(0, 4).join('<br>');
+        // E列以降 (インデックス 4〜) が裏面
+        backContent = row.slice(4).join('<br>');
+      }
+    
+      document.getElementById('card-front-content').innerHTML = frontContent;
+      document.getElementById('card-back-content').innerHTML = backContent;
+    
+      localStorage.setItem(`pos_${currentMode}`, currentIndex);
     }
 
     function nextCard() {
