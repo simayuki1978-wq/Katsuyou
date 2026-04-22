@@ -40,7 +40,15 @@
         /* 活用システム表 */
         .table-container { overflow-x: auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; }
         table { border-collapse: collapse; width: 100%; font-size: 14px; white-space: nowrap; }
-        th, td { border: 1px solid var(--border); padding: 10px; text-align: center; background: var(--card-bg); }
+        th, td {
+          border: 1px solid var(--border);
+          padding: 8px 4px; /* 余白を狭く */
+          text-align: center;
+          background: var(--card-bg);
+          font-size: 12px; /* 文字サイズを少し小さくして視認性アップ */
+          white-space: normal; /* 改行を許可する */
+          min-width: 60px; /* 最小幅を指定 */
+        }
 
         /* フラッシュカード */
         .card-container { perspective: 1000px; flex: 1; min-height: 300px; margin: 20px 0; }
@@ -153,19 +161,28 @@
     }
 
     // 活用システム表示
+    // openConjugation関数の中の該当部分を以下に差し替え
     async function openConjugation() {
-        showScreen('table-screen');
-        const data = await fetchData('system');
-        let html = '<table>';
-        data.forEach((row, i) => {
-            html += '<tr>';
-            row.forEach(cell => {
-                html += i === 0 ? `<th>${cell}</th>` : `<td>${cell}</td>`;
-            });
-            html += '</tr>';
+      showScreen('table-screen');
+      const data = await fetchData('system');
+      let html = '<table>';
+      data.forEach((row, i) => {
+        html += '<tr>';
+        row.forEach(cell => {
+            // 「+」を見つけたら、その前で改行を入れる処理を追加
+            const formattedCell = cell.replace(/\+/g, '<br>+');
+            
+            if (i === 0) {
+                html += `<th>${formattedCell}</th>`;
+            } else {
+                html += `<td>${formattedCell}</td>`;
+            }
         });
-        document.getElementById('table-content').innerHTML = html + '</table>';
+        html += '</tr>';
+      });
+      document.getElementById('table-content').innerHTML = html + '</table>';
     }
+
 
     // フラッシュカード
     async function openFlashcard(mode) {
