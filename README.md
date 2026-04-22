@@ -1,2 +1,27 @@
-# Katsuyou
-The most important thing
+# 日本語活用アプリ
+
+## 概要
+スプレッドシートを利用した日本語活用学習アプリです。
+
+## 機能
+- 活用表閲覧（スクロール対応）
+- フラッシュカード（続き保存）
+- クイズ（スコア・コンボ）
+- 苦手復習モード
+- ダークモード
+
+## 技術
+- HTML / CSS / JavaScript
+- Google Sheets (CSV)
+
+## 使い方
+1. index.htmlを開く
+2. ボタンで各機能へ移動
+
+## データ
+Google SpreadsheetからCSV読み込み
+
+## 今後
+- SRS（忘却曲線）
+- 成績分析
+- アニメーション強化
