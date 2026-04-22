@@ -23,13 +23,19 @@ body {
     background:var(--bg);
     color:var(--text);
     text-align:center;
-
-    user-select:none;
-    -webkit-user-select:none;
-    touch-action:manipulation;
 }
-.screen { display:none; padding:20px; }
-.active { display:block; }
+
+/* TOPボタン縦並び */
+#top {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+#top button {
+    width:80%;
+    max-width:300px;
+}
 
 button {
     padding:15px;
@@ -41,12 +47,16 @@ button {
     color:white;
 }
 
+.screen { display:none; padding:20px; }
+.active { display:block; }
+
 #darkToggle {
     position:fixed;
     top:10px;
     right:10px;
 }
 
+/* テーブル */
 .table-wrap {
     overflow:auto;
     max-height:80vh;
@@ -86,13 +96,15 @@ button {
     transform:rotateY(180deg);
 }
 
-.stats { margin-top:10px; }
-
 input {
     padding:10px;
     font-size:18px;
     width:80%;
     border-radius:10px;
+}
+
+.stats {
+    margin-top:10px;
 }
 </style>
 </head>
@@ -101,6 +113,7 @@ input {
 
 <button id="darkToggle">🌙</button>
 
+<!-- TOP -->
 <div id="top" class="screen active">
 <h1>日本語活用アプリ</h1>
 <button onclick="loadSystem()">活用システム</button>
@@ -110,12 +123,14 @@ input {
 <button onclick="startReview()">復習モード</button>
 </div>
 
+<!-- SYSTEM -->
 <div id="system" class="screen">
 <h2>活用システム</h2>
 <div class="table-wrap" id="table"></div>
 <button onclick="goTop()">戻る</button>
 </div>
 
+<!-- CARD -->
 <div id="cardScreen" class="screen">
 <h2 id="cardTitle"></h2>
 
@@ -131,6 +146,7 @@ input {
 <button onclick="goTop()">戻る</button>
 </div>
 
+<!-- QUIZ -->
 <div id="quiz" class="screen">
 <h2 id="qText"></h2>
 
@@ -150,15 +166,6 @@ input {
 </div>
 
 <script>
-// ===== 初期化（重要）=====
-window.onload = () => {
-
-document.getElementById("darkToggle").onclick = ()=>{
- document.body.classList.toggle("dark");
-};
-
-};
-
 // ===== 共通 =====
 function show(id){
  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -166,16 +173,24 @@ function show(id){
 }
 function goTop(){ show('top'); }
 
+// CSV安定パース
 function parseCSV(text){
- return text.split("\n").map(r=>r.split(","));
+ return text
+   .trim()
+   .split("\n")
+   .map(r => r.split(","))
+   .filter(r => r.length > 1 && r[0] !== "");
 }
 
-// ===== URL =====
+// URL
 const URLS = {
  system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
  verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
  adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv"
 };
+
+// ダークモード
+darkToggle.onclick = ()=>document.body.classList.toggle("dark");
 
 // ===== SYSTEM =====
 async function loadSystem(){
@@ -198,15 +213,29 @@ async function startCards(t){
  type=t;
  show('cardScreen');
 
- cards = parseCSV(await (await fetch(URLS[t])).text());
- index = Number(localStorage.getItem(t+"_index"))||0;
+ let text = await (await fetch(URLS[t])).text();
+ cards = parseCSV(text);
+
+ index = Number(localStorage.getItem(t+"_index")) || 0;
+ if(index >= cards.length) index = 0;
+
+ cardInner.classList.remove("flip");
+
  renderCard();
 }
 
 function renderCard(){
+ if (!cards.length) {
+  cardFront.innerHTML = "データなし";
+  cardBack.innerHTML = "";
+  return;
+ }
+
  let c = cards[index];
- cardFront.innerHTML = c.slice(0,4).join("<br>");
- cardBack.innerHTML = c.slice(4).join("<br>");
+ if (!c) return;
+
+ cardFront.innerHTML = c.slice(0,4).join("<br>") || "（表なし）";
+ cardBack.innerHTML = c.slice(4).join("<br>") || "（裏なし）";
 }
 
 function flipCard(){
@@ -248,7 +277,10 @@ async function startQuiz(){
 }
 
 function startReview(){
- if(wrongList.length===0){ alert("苦手なし"); return; }
+ if(!wrongList.length){
+  alert("苦手なし 👍");
+  return;
+ }
  reviewMode=true;
  show('quiz');
  quizData=wrongList.map(q=>q.split("|"));
@@ -257,7 +289,7 @@ function startReview(){
 
 function nextQuestion(){
  if(reviewMode && wrongList.length===0){
-  alert("もういちど！");
+  alert("克服！");
   goTop();
   return;
  }
@@ -286,7 +318,6 @@ function checkAnswer(){
   }
 
   result.innerText="OK！";
-
  }else{
   combo=0;
   score=Math.max(0,score-5);
@@ -304,9 +335,9 @@ function checkAnswer(){
 }
 
 function updateUI(){
- scoreEl.innerText=score;
- comboEl.innerText=combo;
- bestEl.innerText=bestCombo;
+ score.innerText=score;
+ combo.innerText=combo;
+ best.innerText=bestCombo;
 }
 
 answer.addEventListener("keydown",e=>{
