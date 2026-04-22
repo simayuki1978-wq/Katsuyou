@@ -167,3 +167,187 @@ input {
     width:80%;
     border-radius:10px;
 }
+
+const URLS = {
+ system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
+ verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
+ adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv"
+};
+
+// ===== 共通 =====
+function show(id){
+ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+}
+
+function goTop(){ show('top'); }
+
+function parseCSV(text){
+ return text.split("\n").map(r=>r.split(","));
+}
+
+// ===== ダークモード =====
+document.getElementById("darkToggle").onclick = ()=>{
+ document.body.classList.toggle("dark");
+};
+
+// ===== SYSTEM =====
+async function loadSystem(){
+ show('system');
+ let res = await fetch(URLS.system);
+ let data = parseCSV(await res.text());
+
+ let html="<table border=1>";
+ data.forEach(r=>{
+  html+="<tr>"+r.map(c=>`<td>${c}</td>`).join("")+"</tr>";
+ });
+ html+="</table>";
+
+ document.getElementById("table").innerHTML=html;
+}
+
+// ===== CARD =====
+let cards=[], index=0, type="", flipped=false;
+
+async function startCards(t){
+ type=t;
+ show('cardScreen');
+
+ let res = await fetch(URLS[t]);
+ cards = parseCSV(await res.text());
+
+ index = Number(localStorage.getItem(t+"_index"))||0;
+ renderCard();
+}
+
+function renderCard(){
+ let c = cards[index];
+ document.getElementById("cardFront").innerHTML = c.slice(0,4).join("<br>");
+ document.getElementById("cardBack").innerHTML = c.slice(4).join("<br>");
+}
+
+function flipCard(){
+ document.getElementById("cardInner").classList.toggle("flip");
+}
+
+function nextCard(){
+ index=(index+1)%cards.length;
+ localStorage.setItem(type+"_index",index);
+ document.getElementById("cardInner").classList.remove("flip");
+ renderCard();
+}
+
+function prevCard(){
+ index=(index-1+cards.length)%cards.length;
+ localStorage.setItem(type+"_index",index);
+ document.getElementById("cardInner").classList.remove("flip");
+ renderCard();
+}
+
+// ===== QUIZ =====
+let quizData=[], currentQ;
+let score=0, combo=0, bestCombo=0;
+let wrongList = JSON.parse(localStorage.getItem("wrongList")||"[]");
+let reviewMode=false;
+
+async function startQuiz(){
+ show('quiz');
+ reviewMode=false;
+
+ score=0; combo=0;
+ updateUI();
+
+ let [v,a] = await Promise.all([
+  fetch(URLS.verb).then(r=>r.text()),
+  fetch(URLS.adj).then(r=>r.text())
+ ]);
+
+ quizData=[...parseCSV(v),...parseCSV(a)];
+ nextQuestion();
+}
+
+function startReview(){
+ if(wrongList.length===0){
+  alert("苦手問題なし");
+  return;
+ }
+
+ reviewMode=true;
+ show('quiz');
+ quizData=wrongList.map(q=>q.split("|"));
+ nextQuestion();
+}
+
+function nextQuestion(){
+ if(reviewMode && wrongList.length===0){
+  alert("克服！");
+  goTop();
+  return;
+ }
+
+ currentQ = quizData[Math.floor(Math.random()*quizData.length)];
+
+ document.getElementById("qText").innerText =
+ `${currentQ[0]} の ${currentQ[1]} のかたちは？`;
+
+ document.getElementById("answer").value="";
+ document.getElementById("result").innerText="";
+}
+
+function normalize(s){ return s.replace(/\s/g,""); }
+
+function checkAnswer(){
+ let ans = normalize(answer.value);
+ let correct = currentQ.slice(4).join("");
+
+ if(correct.includes(ans)){
+  score+=10+combo*2;
+  combo++;
+  if(combo>bestCombo) bestCombo=combo;
+
+  if(reviewMode){
+   wrongList=wrongList.filter(q=>q!==currentQ.join("|"));
+   localStorage.setItem("wrongList",JSON.stringify(wrongList));
+  }
+
+  showFeedback("OK！","green");
+
+ }else{
+  combo=0;
+  score=Math.max(0,score-5);
+
+  if(!wrongList.includes(currentQ.join("|"))){
+   wrongList.push(currentQ.join("|"));
+   localStorage.setItem("wrongList",JSON.stringify(wrongList));
+  }
+
+  showFeedback("ちがうよ！","red");
+ }
+
+ updateUI();
+ setTimeout(nextQuestion,800);
+}
+
+function showFeedback(t,c){
+ result.innerText=t;
+ result.style.color=c;
+}
+
+function updateUI(){
+ scoreEl.innerText=score;
+ comboEl.innerText=combo;
+ bestEl.innerText=bestCombo;
+}
+
+// Enter対応
+answer.addEventListener("keydown",e=>{
+ if(e.key==="Enter") checkAnswer();
+});
+
+// ズーム防止
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{
+ let now=new Date().getTime();
+ if(now-lastTouchEnd<=300) e.preventDefault();
+ lastTouchEnd=now;
+},false);
