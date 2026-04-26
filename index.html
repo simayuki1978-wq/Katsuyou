@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ja">
+
+<html lang="ja" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,221 +15,328 @@
             --card-bg: #202f36; --border: #3c4d54;
         }
 
-        body {
-            margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg); color: var(--text);
-            display: flex; justify-content: center; transition: 0.3s;
-        }
+```
+    body {
+        margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: var(--bg); color: var(--text);
+        display: flex; justify-content: center; transition: background 0.3s, color 0.3s;
+    }
 
-        #app { width: 100%; max-width: 500px; height: 100vh; display: flex; flex-direction: column; position: relative; }
+    #app { width: 100%; max-width: 500px; height: 100vh; display: flex; flex-direction: column; position: relative; }
 
-        /* ヘッダー・共通 */
-        .header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); }
-        .screen { display: none; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .active { display: flex; }
+    /* ヘッダー */
+    .header {
+        padding: 15px; display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 2px solid var(--border);
+    }
+    .header-title { font-weight: bold; font-size: 16px; }
 
-        /* ボタンデザイン */
-        .btn {
-            background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
-            padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
-            margin-bottom: 15px; text-align: center; text-decoration: none;
-        }
-        .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
-        .btn-blue { background: var(--accent); border-bottom-color: #1899d6; }
-        .btn-sub { background: none; border: 2px solid var(--border); color: var(--text); }
+    .screen { display: none; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+    .active { display: flex; }
 
-        /* 活用システム表 */
-        .table-container { overflow-x: auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; }
-        table { border-collapse: collapse; width: 100%; font-size: 14px; white-space: nowrap; }
-        th, td {
-          border: 1px solid var(--border);
-          padding: 8px 4px; /* 余白を狭く */
-          text-align: center;
-          background: var(--card-bg);
-          font-size: 12px; /* 文字サイズを少し小さくして視認性アップ */
-          white-space: normal; /* 改行を許可する */
-          min-width: 60px; /* 最小幅を指定 */
-        }
+    /* ボタン */
+    .btn {
+        background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
+        padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
+        margin-bottom: 15px; text-align: center; text-decoration: none; display: block; width: 100%; box-sizing: border-box;
+    }
+    .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+    .btn-blue { background: var(--accent); border-bottom-color: #1899d6; }
+    .btn-sub { background: none; border: 2px solid var(--border); border-bottom-width: 2px; color: var(--text); }
 
-        /* フラッシュカード */
-        .card-container { perspective: 1000px; flex: 1; min-height: 300px; margin: 20px 0; }
-        .card {
-            width: 100%; height: 100%; position: relative; transition: transform 0.6s;
-            transform-style: preserve-3d; cursor: pointer;
-        }
-        .card.is-flipped { transform: rotateY(180deg); }
-        .card-face {
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            border: 2px solid var(--border); border-radius: 25px; background: var(--card-bg); padding: 20px; box-sizing: border-box;
-            box-shadow: 0 4px 0 var(--border); font-size: clamp(16px, 5vw, 24px); text-align: center;
-        }
-        .card-back { transform: rotateY(180deg); overflow-y: auto; }
+    /* 活用表 */
+    .table-container { overflow-x: auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    th, td {
+        border: 1px solid var(--border);
+        padding: 8px 4px; text-align: center;
+        background: var(--card-bg);
+        font-size: 12px; white-space: normal; min-width: 60px;
+    }
+    th { background: var(--primary); color: white; font-weight: bold; }
 
-        /* クイズ */
-        #quiz-feedback { font-weight: bold; font-size: 24px; margin: 10px 0; height: 30px; text-align: center; }
-        .quiz-input { width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--border); margin-bottom: 10px; font-size: 18px; }
+    /* フラッシュカード */
+    .card-container { perspective: 1000px; flex: 1; min-height: 300px; margin: 20px 0; }
+    .card {
+        width: 100%; height: 100%; position: relative; transition: transform 0.6s;
+        transform-style: preserve-3d; cursor: pointer;
+    }
+    .card.is-flipped { transform: rotateY(180deg); }
+    .card-face {
+        position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        border: 2px solid var(--border); border-radius: 25px; background: var(--card-bg);
+        padding: 20px; box-sizing: border-box;
+        box-shadow: 0 4px 0 var(--border); font-size: clamp(16px, 5vw, 24px); text-align: center;
+    }
+    .card-back { transform: rotateY(180deg); overflow-y: auto; }
+    .card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
 
-        .nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .mode-toggle { font-size: 12px; cursor: pointer; padding: 5px 10px; border: 1px solid var(--border); border-radius: 10px; }
-    </style>
+    /* クイズ */
+    #quiz-q-container {
+        position: relative; min-height: 150px; margin-bottom: 20px;
+        border: 2px solid var(--border); border-radius: 25px; background: var(--card-bg);
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px; box-sizing: border-box; text-align: center;
+        box-shadow: 0 4px 0 var(--border);
+    }
+    #quiz-feedback { font-weight: bold; font-size: 22px; margin: 10px 0; height: 30px; text-align: center; }
+    #quiz-answer-reveal {
+        font-size: 16px; color: #ff4b4b; margin-bottom: 8px;
+        min-height: 24px; text-align: center; font-weight: bold;
+    }
+    .quiz-input {
+        width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--border);
+        margin-bottom: 10px; font-size: 18px; box-sizing: border-box;
+        background: var(--card-bg); color: var(--text);
+    }
+    .quiz-input:focus { outline: none; border-color: var(--primary); }
+
+    .nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mode-toggle {
+        font-size: 12px; cursor: pointer; padding: 5px 10px;
+        border: 1px solid var(--border); border-radius: 10px;
+        background: var(--card-bg); color: var(--text);
+    }
+
+    /* エラー表示 */
+    .error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
+</style>
+```
+
 </head>
 <body>
 
 <div id="app">
     <div class="header">
-        <span id="screen-title">Top</span>
-        <div class="mode-toggle" onclick="toggleDarkMode()">Dark/Light</div>
+        <span class="header-title" id="screen-title">日本語活用マスター</span>
+        <button class="mode-toggle" onclick="toggleDarkMode()">🌙 Dark / Light</button>
     </div>
 
-    <div id="top-screen" class="screen active">
-      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-        <button class="btn" onclick="openConjugation()">活用システム</button>
-        <button class="btn btn-blue" onclick="openFlashcard('verb')">動詞カード</button>
-        <button class="btn btn-blue" onclick="openFlashcard('adj')">形容詞カード</button>
-        <button class="btn btn-blue" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">例文カード</button> <button class="btn" style="background:#ffc800; border-color:#e5a500" onclick="openQuiz()">クイズ</button>
-      </div>
-    </div>
- 
-    <div id="table-screen" class="screen">
-        <div class="table-container" id="table-content">読み込み中...</div>
-        <button class="btn btn-sub" onclick="showScreen('top-screen')">戻る</button>
-    </div>
-
-    <div id="card-screen" class="screen">
-        <div class="card-container">
-            <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
-                <div class="card-face card-front" id="card-front-content"></div>
-                <div class="card-face card-back" id="card-back-content"></div>
-            </div>
-        </div>
-        <div class="nav-controls">
-            <button class="btn btn-sub" onclick="prevCard()">まえへ</button>
-            <button class="btn btn-sub" onclick="nextCard()">つぎへ</button>
-        </div>
-        <button class="btn btn-sub" onclick="showScreen('top-screen')">Topへ戻る</button>
-    </div>
-
-    <div id="quiz-screen" class="screen">
-        <div id="quiz-q-container" class="card-face" style="position:relative; height:150px; margin-bottom:20px;">
-            <div id="quiz-question"></div>
-        </div>
-        <div id="quiz-feedback"></div>
-        <input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力...">
-        <button class="btn" onclick="checkAnswer()">次へ</button>
-        <div style="display:flex; justify-content: space-between; margin-top: auto;">
-            <button class="btn btn-sub" onclick="openConjugation()">活用システム</button>
-            <button class="btn btn-sub" onclick="showScreen('top-screen')">戻る</button>
-        </div>
+```
+<!-- トップ画面 -->
+<div id="top-screen" class="screen active">
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <button class="btn" onclick="openConjugation()">📋 活用システム</button>
+        <button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード</button>
+        <button class="btn btn-blue" onclick="openFlashcard('adj')">📗 形容詞カード</button>
+        <button class="btn" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">📝 例文カード</button>
+        <button class="btn" style="background:#ffc800; border-color:#e5a500; color:#333;" onclick="openQuiz()">🎯 クイズ</button>
     </div>
 </div>
 
+<!-- 活用表画面 -->
+<div id="table-screen" class="screen">
+    <div class="table-container" id="table-content">読み込み中...</div>
+    <button class="btn btn-sub" onclick="showScreen('top-screen', 'トップ')">← 戻る</button>
+</div>
+
+<!-- フラッシュカード画面 -->
+<div id="card-screen" class="screen">
+    <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
+    <div class="card-container">
+        <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
+            <div class="card-face card-front" id="card-front-content">
+                <span class="card-hint">読み込み中...</span>
+            </div>
+            <div class="card-face card-back" id="card-back-content"></div>
+        </div>
+    </div>
+    <div class="nav-controls">
+        <button class="btn btn-sub" onclick="prevCard()">← まえへ</button>
+        <button class="btn btn-sub" onclick="nextCard()">つぎへ →</button>
+    </div>
+    <button class="btn btn-sub" onclick="showScreen('top-screen', 'トップ')">← トップへ戻る</button>
+</div>
+
+<!-- クイズ画面 -->
+<div id="quiz-screen" class="screen">
+    <div id="quiz-q-container">
+        <div id="quiz-question"></div>
+    </div>
+    <div id="quiz-feedback"></div>
+    <div id="quiz-answer-reveal"></div>
+    <input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力..."
+           onkeydown="if(event.key==='Enter') checkAnswer()">
+    <button class="btn" onclick="checkAnswer()">答え合わせ</button>
+    <div style="display:flex; gap:10px; margin-top: auto;">
+        <button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表</button>
+        <button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen', 'トップ')">← 戻る</button>
+    </div>
+</div>
+```
+
+</div>
+
 <script>
+    // ===== データURL =====
     const URLS = {
-    system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
-    verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
-    adj: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv",
-    example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv" // 追加
+        system:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
+        verb:    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
+        adj:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv",
+        example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv"
     };
 
-// dataStoreにも初期値を追加
-    let dataStore = { system: [], verb: [], adj: [], example: [] }; 
-    let currentMode = ''; 
+    let dataStore = { system: [], verb: [], adj: [], example: [] };
+    let currentMode = '';
     let currentIndex = 0;
     let currentQuizItem = null;
+    let quizColIdx = 4;
+    let quizWaitingNext = false; // 不正解後、次へ進む状態かどうか
 
-    // CSV Parse
+    // ===== [修正1] RFC4180準拠のCSVパーサー（カンマ・改行を含むセルに対応）=====
     function parseCSV(text) {
-        return text.split('\n').filter(line => line.trim()).map(line => line.split(',').map(cell => cell.trim()));
+        const rows = [];
+        let row = [];
+        let cell = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            const next = text[i + 1];
+
+            if (inQuotes) {
+                if (ch === '"' && next === '"') {
+                    cell += '"'; i++; // エスケープされた引用符
+                } else if (ch === '"') {
+                    inQuotes = false; // 引用符終了
+                } else {
+                    cell += ch;
+                }
+            } else {
+                if (ch === '"') {
+                    inQuotes = true; // 引用符開始
+                } else if (ch === ',') {
+                    row.push(cell.trim()); cell = '';
+                } else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+                    if (ch === '\r') i++;
+                    row.push(cell.trim()); cell = '';
+                    if (row.some(c => c !== '')) rows.push(row);
+                    row = [];
+                } else if (ch === '\r') {
+                    row.push(cell.trim()); cell = '';
+                    if (row.some(c => c !== '')) rows.push(row);
+                    row = [];
+                } else {
+                    cell += ch;
+                }
+            }
+        }
+        // 最終行の処理
+        if (cell !== '' || row.length > 0) {
+            row.push(cell.trim());
+            if (row.some(c => c !== '')) rows.push(row);
+        }
+        return rows;
     }
 
     async function fetchData(key) {
         if (dataStore[key].length > 0) return dataStore[key];
-        const res = await fetch(URLS[key]);
-        const text = await res.text();
-        dataStore[key] = parseCSV(text);
-        return dataStore[key];
+        try {
+            const res = await fetch(URLS[key]);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const text = await res.text();
+            dataStore[key] = parseCSV(text);
+            return dataStore[key];
+        } catch (e) {
+            console.error(`fetchData(${key}) failed:`, e);
+            return [];
+        }
     }
 
-    function showScreen(id) {
+    // ===== [修正2] 画面タイトルを人間が読める文字列に =====
+    const SCREEN_TITLES = {
+        'top-screen':   '日本語活用マスター',
+        'table-screen': '📋 活用システム',
+        'card-screen':  '📘 フラッシュカード',
+        'quiz-screen':  '🎯 クイズ'
+    };
+
+    function showScreen(id, title) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        document.getElementById('screen-title').innerText = id.split('-')[0].toUpperCase();
+        document.getElementById('screen-title').innerText = SCREEN_TITLES[id] || title || id;
     }
 
-    // ダークモード
+    // ===== [修正3] data-theme を <html> に設定（:root が効くように）=====
     function toggleDarkMode() {
-        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', theme);
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
     }
 
-    // 活用システム表示
-    // openConjugation関数の中の該当部分を以下に差し替え
+    // ===== 活用システム表示 =====
     async function openConjugation() {
-    showScreen('table-screen');
-    const data = await fetchData('system');
-    if (data.length === 0) return;
-
-    let html = '<table>';
-    data.forEach((row, i) => {
-        html += '<tr>';
-        
-        // G列はインデックス6（A=0, B=1, C=2, D=3, E=4, F=5, G=6）
-        // 0から6までの列を表示する
-        for (let j = 0; j <= 6; j++) {
-            // データが存在しない列の場合は空文字を入れる
-            const cell = row[j] !== undefined ? row[j] : "";
-            
-            // 「+」記号で改行を入れる処理
-            const formattedCell = cell.replace(/\+/g, '<br>+');
-            
-            if (i === 0) {
-                html += `<th>${formattedCell}</th>`;
-            } else {
-                html += `<td>${formattedCell}</td>`;
-            }
+        showScreen('table-screen');
+        const data = await fetchData('system');
+        if (data.length === 0) {
+            document.getElementById('table-content').innerHTML = '<p class="error-msg">データの読み込みに失敗しました。</p>';
+            return;
         }
-        html += '</tr>';
-      });
+
+        let html = '<table>';
+        data.forEach((row, i) => {
+            html += '<tr>';
+            for (let j = 0; j <= 6; j++) {
+                const cell = row[j] !== undefined ? row[j] : '';
+                const formatted = cell.replace(/\+/g, '<br>+');
+                html += i === 0 ? `<th>${formatted}</th>` : `<td>${formatted}</td>`;
+            }
+            html += '</tr>';
+        });
         document.getElementById('table-content').innerHTML = html + '</table>';
     }
 
-    // フラッシュカード
+    // ===== フラッシュカード =====
     async function openFlashcard(mode) {
         currentMode = mode;
+        showScreen('card-screen');
+        document.getElementById('card-front-content').innerHTML = '読み込み中...';
+        document.getElementById('card-back-content').innerHTML = '';
+
         const data = await fetchData(mode);
-        currentIndex = parseInt(localStorage.getItem(`pos_${mode}`)) || 1; // 0行目はヘッダーなので1から
+
+        // ===== [修正4] データが空・不足の場合のガード =====
+        if (data.length <= 1) {
+            document.getElementById('card-front-content').innerHTML = '<span class="error-msg">データがありません</span>';
+            return;
+        }
+
+        currentIndex = parseInt(localStorage.getItem(`pos_${mode}`)) || 1;
         if (currentIndex >= data.length) currentIndex = 1;
         renderCard();
-        showScreen('card-screen');
     }
 
     function renderCard() {
-      const data = dataStore[currentMode];
-      const row = data[currentIndex];
-      const cardElement = document.getElementById('main-card');
-      cardElement.classList.remove('is-flipped');
-    
-      let frontContent, backContent;
+        const data = dataStore[currentMode];
 
-      if (currentMode === 'example') {
-        // --- 例文カード専用の切り分け ---
-        // A-C列 (インデックス 0, 1, 2) が表面
-        frontContent = row.slice(0, 3).join('<br>');
-        // D列以降 (インデックス 3〜) が裏面
-        backContent = row.slice(3).join('<br>');
-      } else {
-        // --- 動詞・形容詞カード (従来通り) ---
-        // A-D列 (インデックス 0, 1, 2, 3) が表面
-        frontContent = row.slice(0, 4).join('<br>');
-        // E列以降 (インデックス 4〜) が裏面
-        backContent = row.slice(4).join('<br>');
-      }
-    
-      document.getElementById('card-front-content').innerHTML = frontContent;
-      document.getElementById('card-back-content').innerHTML = backContent;
-    
-      localStorage.setItem(`pos_${currentMode}`, currentIndex);
+        // ===== [修正4] インデックス範囲ガード =====
+        if (!data || !data[currentIndex]) {
+            document.getElementById('card-front-content').innerHTML = '<span class="error-msg">カードが見つかりません</span>';
+            return;
+        }
+
+        const row = data[currentIndex];
+        document.getElementById('main-card').classList.remove('is-flipped');
+
+        // 進捗表示
+        document.getElementById('card-progress').innerText =
+            `${currentIndex} / ${data.length - 1}`;
+
+        let frontContent, backContent;
+        if (currentMode === 'example') {
+            frontContent = row.slice(0, 3).filter(Boolean).join('<br>');
+            backContent  = row.slice(3).filter(Boolean).join('<br>');
+        } else {
+            frontContent = row.slice(0, 4).filter(Boolean).join('<br>');
+            backContent  = row.slice(4).filter(Boolean).join('<br>');
+        }
+
+        document.getElementById('card-front-content').innerHTML =
+            frontContent + '<br><span class="card-hint">タップで答えを確認</span>';
+        document.getElementById('card-back-content').innerHTML = backContent || '（裏面データなし）';
+
+        localStorage.setItem(`pos_${currentMode}`, currentIndex);
     }
 
     function nextCard() {
@@ -245,62 +353,83 @@
         }
     }
 
-    // クイズ
-    // クイズ専用の変数（正解判定用）
-  let quizCorrectAnswers = []; 
-
-// クイズ開始：動詞のみを対象にする
-  async function openQuiz() {
-    await fetchData('verb'); // 動詞データのみ読み込み
-    showScreen('quiz-screen');
-    newQuiz();
-  }
-
-  function newQuiz() {
-    // 動詞データ（ヘッダーを除く1行目以降）を取得
-    const pool = dataStore.verb.slice(1);
-    currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
-    const headers = dataStore.verb[0]; 
-    
-    // 出題する列（E列以降＝インデックス4以降）をランダムに選択
-    const colIdx = Math.floor(Math.random() * (currentQuizItem.length - 4)) + 4;
-    const formName = headers[colIdx] || "その";
-    
-    // 正解の候補を作成（漢字の正解、ひらがなの正解などがあればそれらを配列に入れる）
-    // ここでは、その列に書かれている値そのものを正解とします
-    quizCorrectAnswers = [currentQuizItem[colIdx].trim()];
-
-    document.getElementById('quiz-question').innerHTML = 
-        `「${currentQuizItem[0]} (${currentQuizItem[1]})」の<br><strong>${formName}</strong> のかたちは？`;
-    
-    document.getElementById('quiz-answer').value = '';
-    document.getElementById('quiz-feedback').innerText = '';
-    document.getElementById('quiz-answer').focus();
-  }
-
-  function checkAnswer() {
-    const userAns = document.getElementById('quiz-answer').value.trim();
-    const feedback = document.getElementById('quiz-feedback');
-    
-    if (!userAns) return;
-
-    // 正解判定
-    // quizCorrectAnswersに含まれる値、またはスプレッドシートのどこかの列の値と一致するか
-    // （漢字/ひらがな両方対応のため、行全体から探すロジックを少し残しつつ、空白を除外）
-    const isCorrect = currentQuizItem.some((val, index) => {
-        return index >= 4 && val === userAns; // E列以降の活用形と一致するか
-    });
-
-    if (isCorrect) {
-        feedback.style.color = "var(--primary)";
-        feedback.innerText = "OK！";
-        setTimeout(newQuiz, 1000);
-    } else {
-        feedback.style.color = "#ff4b4b";
-        feedback.innerText = "ちがうよ！";
-        // 正解を表示したい場合はここに正解を表示する処理を追加できます
+    // ===== クイズ =====
+    async function openQuiz() {
+        showScreen('quiz-screen');
+        await fetchData('verb');
+        if (dataStore.verb.length <= 1) {
+            document.getElementById('quiz-question').innerHTML = '<span class="error-msg">データの読み込みに失敗しました。</span>';
+            return;
+        }
+        quizWaitingNext = false;
+        newQuiz();
     }
-  }
+
+    function newQuiz() {
+        const pool = dataStore.verb.slice(1);
+        currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
+        const headers = dataStore.verb[0];
+
+        // E列以降（インデックス4〜）からランダムに出題
+        quizColIdx = Math.floor(Math.random() * (currentQuizItem.length - 4)) + 4;
+        const formName = headers[quizColIdx] || 'その';
+
+        document.getElementById('quiz-question').innerHTML =
+            `「${currentQuizItem[0]}（${currentQuizItem[1]}）」の<br><strong>${formName}</strong> のかたちは？`;
+        document.getElementById('quiz-answer').value = '';
+        document.getElementById('quiz-feedback').innerText = '';
+        document.getElementById('quiz-answer-reveal').innerText = '';
+        document.getElementById('quiz-answer').disabled = false;
+        document.getElementById('quiz-answer').focus();
+        quizWaitingNext = false;
+    }
+
+    function checkAnswer() {
+        // ===== [修正5] 不正解後は「次の問題へ」ボタンとして機能 =====
+        if (quizWaitingNext) {
+            newQuiz();
+            return;
+        }
+
+        const userAns = document.getElementById('quiz-answer').value.trim();
+        if (!userAns) return;
+
+        const feedback = document.getElementById('quiz-feedback');
+        const reveal   = document.getElementById('quiz-answer-reveal');
+
+        // E列以降のすべての値と比較（漢字・ひらがな両対応）
+        const isCorrect = currentQuizItem.some((val, idx) =>
+            idx >= 4 && val.trim() === userAns
+        );
+
+        if (isCorrect) {
+            feedback.style.color = 'var(--primary)';
+            feedback.innerText = '✅ 正解！';
+            reveal.innerText = '';
+            document.getElementById('quiz-answer').disabled = true;
+            setTimeout(newQuiz, 1000);
+        } else {
+            feedback.style.color = '#ff4b4b';
+            feedback.innerText = '❌ ちがうよ！';
+            // ===== [修正5] 正解を表示し、ボタンを「次へ」に変える =====
+            reveal.innerText = `正解：${currentQuizItem[quizColIdx]}`;
+            document.getElementById('quiz-answer').disabled = true;
+            quizWaitingNext = true;
+            // ボタンのテキストを「次の問題へ」に変更
+            document.querySelector('#quiz-screen .btn:not(.btn-sub)').innerText = '次の問題へ →';
+            setTimeout(() => {
+                document.querySelector('#quiz-screen .btn:not(.btn-sub)').innerText = '答え合わせ';
+            }, 100);
+        }
+
+        // 正解後もボタンテキストをリセット
+        if (isCorrect) {
+            setTimeout(() => {
+                document.querySelector('#quiz-screen .btn:not(.btn-sub)').innerText = '答え合わせ';
+            }, 1000);
+        }
+    }
 </script>
+
 </body>
 </html>
