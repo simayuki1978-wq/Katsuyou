@@ -15,109 +15,130 @@
             --card-bg: #202f36; --border: #3c4d54; --accent: #1cb0f6;
         }
 
-```
-    body {
-        margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
-        background-color: var(--bg); color: var(--text);
-        display: flex; justify-content: center;
-        transition: background-color 0.3s, color 0.3s;
-    }
+        /* ── PC中央表示のためにbodyをflexセンター ── */
+        body {
+            margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: var(--text);
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        [data-theme="dark"] body, body[data-theme="dark"] {
+            background-color: #0a1318;
+        }
 
-    #app {
-        width: 100%; max-width: 500px; height: 100vh;
-        display: flex; flex-direction: column; position: relative;
-        background-color: var(--bg); color: var(--text);
-        transition: background-color 0.3s, color 0.3s;
-    }
+        #app {
+            width: 100%; max-width: 500px; min-height: 100vh;
+            display: flex; flex-direction: column; position: relative;
+            background-color: var(--bg); color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+            /* PCで見たときに見やすいよう影をつける */
+            box-shadow: 0 0 30px rgba(0,0,0,0.12);
+        }
 
-    /* ヘッダー */
-    .header {
-        padding: 15px; display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 2px solid var(--border);
-        background-color: var(--bg); color: var(--text);
-    }
-    .header-title { font-weight: bold; font-size: 16px; color: var(--text); }
+        /* ヘッダー */
+        .header {
+            padding: 15px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--border);
+            background-color: var(--bg); color: var(--text);
+        }
+        .header-title { font-weight: bold; font-size: 16px; color: var(--text); }
 
-    .screen { display: none; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto; background-color: var(--bg); color: var(--text); }
-    .active { display: flex; }
+        .screen { display: none; flex-direction: column; flex: 1; padding: 20px; box-sizing: border-box; overflow-y: auto; background-color: var(--bg); color: var(--text); }
+        .active { display: flex; }
 
-    /* ボタン */
-    .btn {
-        background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
-        padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
-        margin-bottom: 15px; text-align: center; text-decoration: none; display: block; width: 100%; box-sizing: border-box;
-    }
-    .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
-    .btn-blue { background: var(--accent); border-bottom-color: #1899d6; }
-    .btn-sub {
-        background: var(--card-bg); border: 2px solid var(--border); border-bottom-width: 2px;
-        color: var(--text);
-    }
+        /* ボタン */
+        .btn {
+            background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
+            padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
+            margin-bottom: 15px; text-align: center; text-decoration: none; display: block; width: 100%; box-sizing: border-box;
+        }
+        .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+        .btn-blue { background: var(--accent); border-bottom-color: #1899d6; }
+        .btn-sub {
+            background: var(--card-bg); border: 2px solid var(--border); border-bottom-width: 2px;
+            color: var(--text);
+        }
 
-    /* 活用表 */
-    .table-container { overflow-x: auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; }
-    table { border-collapse: collapse; width: 100%; font-size: 14px; }
-    th, td {
-        border: 1px solid var(--border);
-        padding: 8px 4px; text-align: center;
-        background-color: var(--card-bg);
-        color: var(--text);
-        font-size: 12px; white-space: normal; min-width: 60px;
-    }
-    th { background-color: var(--primary); color: white; font-weight: bold; }
+        /* ── 活用表: 列幅をスプレッドシートに近づける ── */
+        .table-container { overflow-x: auto; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px; }
+        table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 13px; }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 10px; text-align: center;
+            background-color: var(--card-bg);
+            color: var(--text);
+            font-size: 12px; white-space: nowrap;
+        }
+        th { background-color: var(--primary); color: white; font-weight: bold; }
 
-    /* フラッシュカード */
-    .card-container { perspective: 1000px; flex: 1; min-height: 300px; margin: 20px 0; }
-    .card {
-        width: 100%; height: 100%; position: relative; transition: transform 0.6s;
-        transform-style: preserve-3d; cursor: pointer;
-    }
-    .card.is-flipped { transform: rotateY(180deg); }
-    .card-face {
-        position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        border: 2px solid var(--border); border-radius: 25px;
-        background-color: var(--card-bg); color: var(--text);
-        padding: 20px; box-sizing: border-box;
-        box-shadow: 0 4px 0 var(--border); font-size: clamp(16px, 5vw, 24px); text-align: center;
-    }
-    .card-back { transform: rotateY(180deg); overflow-y: auto; }
-    .card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
+        /* 列ごとの幅指定 */
+        table col:nth-child(1) { width: 90px; }  /* 動詞 */
+        table col:nth-child(2) { width: 60px; }  /* 種類 */
+        table col:nth-child(3) { width: 80px; }  /* 意味 */
+        table col:nth-child(4) { width: 80px; }  /* ます形 */
+        table col:nth-child(5) { width: 80px; }  /* て形 */
+        table col:nth-child(6) { width: 80px; }  /* た形 */
+        table col:nth-child(7) { width: 80px; }  /* ない形 */
 
-    /* クイズ */
-    #quiz-q-container {
-        position: relative; min-height: 150px; margin-bottom: 20px;
-        border: 2px solid var(--border); border-radius: 25px;
-        background-color: var(--card-bg); color: var(--text);
-        display: flex; align-items: center; justify-content: center;
-        padding: 20px; box-sizing: border-box; text-align: center;
-        box-shadow: 0 4px 0 var(--border);
-    }
-    #quiz-feedback { font-weight: bold; font-size: 22px; margin: 10px 0; height: 30px; text-align: center; }
-    #quiz-answer-reveal {
-        font-size: 16px; color: #ff4b4b; margin-bottom: 8px;
-        min-height: 24px; text-align: center; font-weight: bold;
-    }
-    .quiz-input {
-        width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--border);
-        margin-bottom: 10px; font-size: 18px; box-sizing: border-box;
-        background-color: var(--card-bg); color: var(--text);
-    }
-    .quiz-input:focus { outline: none; border-color: var(--primary); }
+        /* フラッシュカード */
+        .card-container { perspective: 1000px; flex: 1; min-height: 300px; margin: 20px 0; }
+        .card {
+            width: 100%; height: 100%; position: relative; transition: transform 0.6s;
+            transform-style: preserve-3d; cursor: pointer;
+        }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 2px solid var(--border); border-radius: 25px;
+            background-color: var(--card-bg); color: var(--text);
+            padding: 20px; box-sizing: border-box;
+            box-shadow: 0 4px 0 var(--border); font-size: clamp(16px, 5vw, 24px); text-align: center;
+        }
+        .card-back { transform: rotateY(180deg); overflow-y: auto; font-size: clamp(13px, 3.5vw, 18px); }
 
-    .nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .mode-toggle {
-        font-size: 12px; cursor: pointer; padding: 5px 10px;
-        border: 1px solid var(--border); border-radius: 10px;
-        background-color: var(--card-bg); color: var(--text);
-        transition: background-color 0.3s, color 0.3s;
-    }
+        /* 動詞カード裏面テーブル */
+        .back-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        .back-table th { background-color: var(--primary); color: white; padding: 5px 8px; font-size: 12px; white-space: nowrap; }
+        .back-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .back-table tr:last-child td { border-bottom: none; }
 
-    /* エラー表示 */
-    .error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
-</style>
-```
+        .card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
 
+        /* クイズ */
+        #quiz-q-container {
+            position: relative; min-height: 150px; margin-bottom: 20px;
+            border: 2px solid var(--border); border-radius: 25px;
+            background-color: var(--card-bg); color: var(--text);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box; text-align: center;
+            box-shadow: 0 4px 0 var(--border);
+        }
+        #quiz-feedback { font-weight: bold; font-size: 22px; margin: 10px 0; height: 30px; text-align: center; }
+        #quiz-answer-reveal {
+            font-size: 16px; color: #ff4b4b; margin-bottom: 8px;
+            min-height: 24px; text-align: center; font-weight: bold;
+        }
+        .quiz-input {
+            width: 100%; padding: 15px; border-radius: 15px; border: 2px solid var(--border);
+            margin-bottom: 10px; font-size: 18px; box-sizing: border-box;
+            background-color: var(--card-bg); color: var(--text);
+        }
+        .quiz-input:focus { outline: none; border-color: var(--primary); }
+
+        .nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .mode-toggle {
+            font-size: 12px; cursor: pointer; padding: 5px 10px;
+            border: 1px solid var(--border); border-radius: 10px;
+            background-color: var(--card-bg); color: var(--text);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* エラー表示 */
+        .error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
+    </style>
 </head>
 <body>
 
@@ -127,59 +148,56 @@
         <button class="mode-toggle" onclick="toggleDarkMode()">🌙 Dark / Light</button>
     </div>
 
-```
-<!-- トップ画面 -->
-<div id="top-screen" class="screen active">
-    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-        <button class="btn" onclick="openConjugation()">📋 活用システム</button>
-        <button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード</button>
-        <button class="btn btn-blue" onclick="openFlashcard('adj')">📗 形容詞カード</button>
-        <button class="btn" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">📝 例文カード</button>
-        <button class="btn" style="background:#ffc800; border-color:#e5a500; color:#333;" onclick="openQuiz()">🎯 クイズ</button>
-    </div>
-</div>
-
-<!-- 活用表画面 -->
-<div id="table-screen" class="screen">
-    <div class="table-container" id="table-content">読み込み中...</div>
-    <button class="btn btn-sub" onclick="showScreen('top-screen', 'トップ')">← 戻る</button>
-</div>
-
-<!-- フラッシュカード画面 -->
-<div id="card-screen" class="screen">
-    <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
-    <div class="card-container">
-        <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
-            <div class="card-face card-front" id="card-front-content">
-                <span class="card-hint">読み込み中...</span>
-            </div>
-            <div class="card-face card-back" id="card-back-content"></div>
+    <!-- トップ画面 -->
+    <div id="top-screen" class="screen active">
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <button class="btn" onclick="openConjugation()">📋 活用システム</button>
+            <button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード</button>
+            <button class="btn btn-blue" onclick="openFlashcard('adj')">📗 形容詞カード</button>
+            <button class="btn" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">📝 例文カード</button>
+            <button class="btn" style="background:#ffc800; border-color:#e5a500; color:#333;" onclick="openQuiz()">🎯 クイズ</button>
         </div>
     </div>
-    <div class="nav-controls">
-        <button class="btn btn-sub" onclick="prevCard()">← まえへ</button>
-        <button class="btn btn-sub" onclick="nextCard()">つぎへ →</button>
-    </div>
-    <button class="btn btn-sub" onclick="showScreen('top-screen', 'トップ')">← トップへ戻る</button>
-</div>
 
-<!-- クイズ画面 -->
-<div id="quiz-screen" class="screen">
-    <div id="quiz-q-container">
-        <div id="quiz-question"></div>
+    <!-- 活用表画面 -->
+    <div id="table-screen" class="screen">
+        <div class="table-container" id="table-content">読み込み中...</div>
+        <button class="btn btn-sub" onclick="showScreen('top-screen', 'トップ')">← 戻る</button>
     </div>
-    <div id="quiz-feedback"></div>
-    <div id="quiz-answer-reveal"></div>
-    <input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力..."
-           onkeydown="if(event.key==='Enter') checkAnswer()">
-    <button class="btn" onclick="checkAnswer()">答え合わせ</button>
-    <div style="display:flex; gap:10px; margin-top: auto;">
-        <button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表</button>
-        <button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen', 'トップ')">← 戻る</button>
-    </div>
-</div>
-```
 
+    <!-- フラッシュカード画面 -->
+    <div id="card-screen" class="screen">
+        <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
+        <div class="card-container">
+            <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-face card-front" id="card-front-content">
+                    <span class="card-hint">読み込み中...</span>
+                </div>
+                <div class="card-face card-back" id="card-back-content"></div>
+            </div>
+        </div>
+        <div class="nav-controls">
+            <button class="btn btn-sub" onclick="prevCard()">← まえへ</button>
+            <button class="btn btn-sub" onclick="nextCard()">つぎへ →</button>
+        </div>
+        <button class="btn btn-sub" onclick="showScreen('top-screen', 'トップ')">← トップへ戻る</button>
+    </div>
+
+    <!-- クイズ画面 -->
+    <div id="quiz-screen" class="screen">
+        <div id="quiz-q-container">
+            <div id="quiz-question"></div>
+        </div>
+        <div id="quiz-feedback"></div>
+        <div id="quiz-answer-reveal"></div>
+        <input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力..."
+               onkeydown="if(event.key==='Enter') checkAnswer()">
+        <button class="btn" onclick="checkAnswer()">答え合わせ</button>
+        <div style="display:flex; gap:10px; margin-top: auto;">
+            <button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表</button>
+            <button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen', 'トップ')">← 戻る</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -283,10 +301,19 @@
             return;
         }
 
+        // 列数を最初の行から決定（ヘッダー行の非空列数）
+        const headerRow = data[0];
+        const colCount = headerRow.filter(c => c !== '').length || 7;
+
         let html = '<table>';
+        // colgroup で各列に幅を指定
+        html += '<colgroup>';
+        for (let j = 0; j < colCount; j++) html += '<col>';
+        html += '</colgroup>';
+
         data.forEach((row, i) => {
             html += '<tr>';
-            for (let j = 0; j <= 6; j++) {
+            for (let j = 0; j < colCount; j++) {
                 const cell = row[j] !== undefined ? row[j] : '';
                 const formatted = cell.replace(/\+/g, '<br>+');
                 html += i === 0 ? `<th>${formatted}</th>` : `<td>${formatted}</td>`;
@@ -329,17 +356,37 @@
             `${currentIndex} / ${data.length - 1}`;
 
         let frontContent, backContent;
+
         if (currentMode === 'example') {
             frontContent = row.slice(0, 3).filter(Boolean).join('<br>');
             backContent  = row.slice(3).filter(Boolean).join('<br>');
+            document.getElementById('card-back-content').innerHTML = backContent || '（裏面データなし）';
+
+        } else if (currentMode === 'verb') {
+            // 表面: A〜D列（index 0〜3）
+            frontContent = row.slice(0, 4).filter(Boolean).join('<br>');
+
+            // 裏面: E〜L列（index 4〜11）をヘッダー付きテーブルで表示
+            const headers = data[0];
+            let tableHtml = '<table class="back-table"><thead><tr>';
+            for (let i = 4; i <= 11 && i < headers.length; i++) {
+                if (headers[i]) tableHtml += `<th>${headers[i]}</th>`;
+            }
+            tableHtml += '</tr></thead><tbody><tr>';
+            for (let i = 4; i <= 11 && i < row.length; i++) {
+                if (data[0][i]) tableHtml += `<td>${row[i] || '―'}</td>`;
+            }
+            tableHtml += '</tr></tbody></table>';
+            document.getElementById('card-back-content').innerHTML = tableHtml;
+
         } else {
             frontContent = row.slice(0, 4).filter(Boolean).join('<br>');
             backContent  = row.slice(4).filter(Boolean).join('<br>');
+            document.getElementById('card-back-content').innerHTML = backContent || '（裏面データなし）';
         }
 
         document.getElementById('card-front-content').innerHTML =
             frontContent + '<br><span class="card-hint">タップで答えを確認</span>';
-        document.getElementById('card-back-content').innerHTML = backContent || '（裏面データなし）';
 
         localStorage.setItem(`pos_${currentMode}`, currentIndex);
     }
