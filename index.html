@@ -200,38 +200,39 @@
             background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 16px;
             padding: 16px; margin-bottom: 16px;
         }
-        .explorer-stem-sticky {
-            flex-shrink: 0; text-align: center;
-            background-color: var(--primary); color: white;
-            padding: 12px 10px; border-radius: 12px;
-            margin-bottom: 14px; z-index: 2;
-        }
-        .explorer-stem-label {
-            display: block; font-size: 10px; color: rgba(255,255,255,0.85);
-            letter-spacing: 0.05em; margin-bottom: 2px;
-        }
-        .explorer-stem-value { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
         .explorer-scroller {
             display: flex; flex-direction: column; gap: 10px;
-            overflow-y: auto; max-height: 45vh;
+            overflow-y: auto; max-height: 50vh;
             padding: 2px 2px 4px 2px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
         }
         .explorer-scroller::-webkit-scrollbar { width: 5px; }
         .explorer-scroller::-webkit-scrollbar-track { background: transparent; }
         .explorer-scroller::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        /* 各行：左端に語幹（固定幅・強調）、右側にその活用形ラベルと値を続けて表示。
+           視線が「語幹 → 活用形」と自然に左から右へ流れるようにする。 */
         .explorer-card {
-            flex-shrink: 0; width: 100%;
+            flex-shrink: 0; width: 100%; box-sizing: border-box;
             background-color: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-            padding: 12px 16px; box-sizing: border-box;
-            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            display: flex; align-items: stretch; overflow: hidden;
+        }
+        .explorer-card-stem {
+            flex-shrink: 0; width: 72px;
+            background-color: var(--primary); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 700; letter-spacing: 0.03em;
+            padding: 10px 6px; text-align: center;
+        }
+        .explorer-card-body {
+            flex: 1; min-width: 0;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 10px 14px;
         }
         .explorer-card-label {
             font-size: 11px; color: var(--text); opacity: 0.55; font-weight: 600;
-            flex-shrink: 0; width: 60px;
+            flex-shrink: 0;
         }
-        .explorer-card-value { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: right; flex: 1; }
-        .explorer-stem-part { color: var(--primary); }
-        .explorer-suffix-part { color: var(--text); }
+        .explorer-card-value { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: right; }
+        .explorer-suffix-part { color: var(--primary); }
         .explorer-error {
             grid-column: 1 / -1; text-align: center; padding: 20px;
             color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
@@ -307,10 +308,6 @@
 
             <div class="explorer-section-title">活用形</div>
             <div class="explorer-lower-layout">
-                <div class="explorer-stem-sticky">
-                    <span class="explorer-stem-label">語幹</span>
-                    <div id="explorer-stem-display" class="explorer-stem-value">---</div>
-                </div>
                 <div id="explorer-cards-scroller" class="explorer-scroller"></div>
             </div>
         </div>
@@ -602,8 +599,6 @@
         }
         const scroller = document.getElementById('explorer-cards-scroller');
         if (scroller) scroller.innerHTML = '';
-        const stemDisplay = document.getElementById('explorer-stem-display');
-        if (stemDisplay) stemDisplay.innerText = '-';
     }
 
     // ヘッダー名（文字列配列）から各列の役割をインデックスとして解決する。
@@ -699,7 +694,7 @@
         });
     }
 
-    // 全ピッカー・語幹・活用形カードをターゲット行に同期する
+    // 全ピッカー・活用形カードをターゲット行に同期する
     function explorerUpdateData(rowIndex) {
         const data = dataStore.explorer;
         if (rowIndex < 1 || rowIndex >= data.length) return;
@@ -710,14 +705,14 @@
             select.value = rowIndex;
         });
 
-        // ② 語幹を表示。シートの語幹列に値があればそれを優先し、
+        // ② 語幹を算出。シートの語幹列に値があればそれを優先し、
         //    空欄の場合のみ辞書形＋グループから自動計算したフォールバック値を使う。
         let stemValue = (explorerStemColIdx !== -1 && row[explorerStemColIdx]) ? row[explorerStemColIdx].trim() : '';
         if (stemValue === '') stemValue = explorerComputeFallbackStem(row);
-        document.getElementById('explorer-stem-display').innerText = stemValue === '' ? '-' : stemValue;
 
-        // ③ 活用形カードを縦並びで生成。各カードは「語幹」+「活用語尾」を視覚的に分けて表示し、
-        //    学生が「語幹は変わらず、後ろだけが活用する」ことを直感的に理解できるようにする。
+        // ③ 活用形カードを縦並びで生成。各カードの左端に語幹を固定表示し、
+        //    右側にその活用形のラベルと「語幹に続く部分」を表示することで、
+        //    視線が「語幹 → 活用形」と自然に左から右へ流れるようにする。
         const scroller = document.getElementById('explorer-cards-scroller');
         scroller.innerHTML = '';
 
@@ -734,10 +729,20 @@
             const cardDiv = document.createElement('div');
             cardDiv.className = 'explorer-card';
 
+            // 左端：語幹を固定表示（カードごとに繰り返し表示することで「ここから始まる」ことを強調）
+            const stemBlock = document.createElement('div');
+            stemBlock.className = 'explorer-card-stem';
+            stemBlock.innerText = stemValue === '' ? '-' : stemValue;
+            cardDiv.appendChild(stemBlock);
+
+            // 右側：ラベルと値（値は語幹部分を除いた続きだけをハイライト色で表示）
+            const bodyDiv = document.createElement('div');
+            bodyDiv.className = 'explorer-card-body';
+
             const cardLabel = document.createElement('div');
             cardLabel.className = 'explorer-card-label';
             cardLabel.innerText = columnName;
-            cardDiv.appendChild(cardLabel);
+            bodyDiv.appendChild(cardLabel);
 
             const cardValue = document.createElement('div');
             cardValue.className = 'explorer-card-value';
@@ -745,23 +750,18 @@
             if (fullValue === '') {
                 cardValue.innerText = '---';
             } else if (stemValue !== '' && fullValue.startsWith(stemValue) && fullValue.length > stemValue.length) {
-                // 語幹部分と活用語尾部分を分けて、語幹をハイライト表示する
-                const stemSpan = document.createElement('span');
-                stemSpan.className = 'explorer-stem-part';
-                stemSpan.innerText = stemValue;
-
+                // 語幹に続く活用語尾の部分だけを表示する（語幹は左端ブロックに既に出ているため重複させない）
                 const suffixSpan = document.createElement('span');
                 suffixSpan.className = 'explorer-suffix-part';
                 suffixSpan.innerText = fullValue.slice(stemValue.length);
-
-                cardValue.appendChild(stemSpan);
                 cardValue.appendChild(suffixSpan);
             } else {
-                // 語幹と一致しない（不規則活用など）場合はそのまま表示
+                // 語幹と一致しない（不規則活用など）場合は活用形全体をそのまま表示
                 cardValue.innerText = fullValue;
             }
 
-            cardDiv.appendChild(cardValue);
+            bodyDiv.appendChild(cardValue);
+            cardDiv.appendChild(bodyDiv);
             scroller.appendChild(cardDiv);
         });
 
