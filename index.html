@@ -196,38 +196,42 @@
         }
         .explorer-select:focus { border-color: var(--primary); }
         .explorer-lower-layout {
-            display: flex; align-items: center;
+            display: flex; flex-direction: column;
             background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 16px;
-            padding: 16px; overflow: hidden; margin-bottom: 16px;
+            padding: 16px; margin-bottom: 16px;
         }
         .explorer-stem-sticky {
-            flex-shrink: 0; width: 84px; text-align: center;
+            flex-shrink: 0; text-align: center;
             background-color: var(--primary); color: white;
-            padding: 14px 6px; border-radius: 12px;
-            margin-right: 14px; z-index: 2;
+            padding: 12px 10px; border-radius: 12px;
+            margin-bottom: 14px; z-index: 2;
         }
         .explorer-stem-label {
-            display: block; font-size: 9px; color: rgba(255,255,255,0.8);
+            display: block; font-size: 10px; color: rgba(255,255,255,0.85);
             letter-spacing: 0.05em; margin-bottom: 2px;
         }
-        .explorer-stem-value { font-size: 17px; font-weight: 700; letter-spacing: 0.05em; }
+        .explorer-stem-value { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; }
         .explorer-scroller {
-            display: flex; gap: 10px; overflow-x: auto; flex-grow: 1;
-            padding: 4px 0 8px 0; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+            display: flex; flex-direction: column; gap: 10px;
+            overflow-y: auto; max-height: 45vh;
+            padding: 2px 2px 4px 2px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
         }
-        .explorer-scroller::-webkit-scrollbar { height: 5px; }
+        .explorer-scroller::-webkit-scrollbar { width: 5px; }
         .explorer-scroller::-webkit-scrollbar-track { background: transparent; }
         .explorer-scroller::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
         .explorer-card {
-            flex-shrink: 0; width: 105px;
+            flex-shrink: 0; width: 100%;
             background-color: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-            padding: 12px 8px; text-align: center;
+            padding: 12px 16px; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
         }
         .explorer-card-label {
-            font-size: 9px; color: var(--text); opacity: 0.55; margin-bottom: 6px; font-weight: 600;
-            text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+            font-size: 11px; color: var(--text); opacity: 0.55; font-weight: 600;
+            flex-shrink: 0; width: 60px;
         }
-        .explorer-card-value { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+        .explorer-card-value { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: right; flex: 1; }
+        .explorer-stem-part { color: var(--primary); }
+        .explorer-suffix-part { color: var(--text); }
         .explorer-error {
             grid-column: 1 / -1; text-align: center; padding: 20px;
             color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
@@ -319,10 +323,11 @@
         system:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
         verb:    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
         adj:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv",
-        example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv"
+        example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv",
+        explorer: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=494377810&single=true&output=csv"
     };
 
-    let dataStore = { system: [], verb: [], adj: [], example: [] };
+    let dataStore = { system: [], verb: [], adj: [], example: [], explorer: [] };
     let currentMode = '';
     let currentIndex = 0;
     let currentQuizItem = null;
@@ -545,13 +550,14 @@
     // verbシートの確定済みヘッダー構成（A〜N列）:
     // ID, 辞書形, ふりがな, グループ, 英語の意味(English), 意味（ベトナム語等の参考用）,
     // 語幹, ない形, ます形, 辞書形, 条件形, 意向形, て形, た形
-    const EXPLORER_KEY_COLUMN_HINTS = ["辞書形"];
-    const EXPLORER_GROUP_COLUMN_HINTS = ["グループ"];
+    // ※explorer専用シートのヘッダー名は実際には未確認のため、複数のヒント候補で柔軟に判定する
+    const EXPLORER_KEY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞"];
+    const EXPLORER_GROUP_COLUMN_HINTS = ["グループ", "活用グループ", "種類"];
     const EXPLORER_STEM_COLUMN_HINTS = ["語幹"];
     // プロパティ（上部ピッカー）として表示する列：辞書形・ふりがな・グループ・英語の意味・参考意味
-    const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "ふりがな", "グループ", "英語の意味", "意味"];
+    const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞", "ふりがな", "読み", "グループ", "活用グループ", "種類", "英語の意味", "意味"];
     // 活用形（下部カード）として表示する列：ない形・ます形・辞書形(活用形側)・条件形・意向形・て形・た形
-    const EXPLORER_CONJUGATION_HINTS = ["形"];
+    const EXPLORER_CONJUGATION_HINTS = ["形", "活用"];
 
     let explorerColumns = [];          // ヘッダー名の配列（重複あり得る）
     let explorerKeyColIdx = -1;        // 辞書形（見出し語として使う：最初に出てくる方）
@@ -561,11 +567,24 @@
     let explorerConjugationColIdxs = []; // 下部カード対象の列インデックス
     let explorerInitialized = false;
 
+    // シートに語幹列が無い、または値が空の場合のフォールバック自動計算
+    // （元のv-sync実装のロジックを継承）
+    function explorerComputeFallbackStem(row) {
+        const dictWord = explorerKeyColIdx !== -1 && row[explorerKeyColIdx] ? row[explorerKeyColIdx].trim() : '';
+        const groupNum = explorerGroupColIdx !== -1 && row[explorerGroupColIdx] ? parseInt(row[explorerGroupColIdx], 10) : 1;
+        if (!dictWord) return '';
+        if (groupNum === 3) {
+            if (dictWord === 'する' || dictWord === 'くる' || dictWord === '来る') return '';
+            if (dictWord.endsWith('する') || dictWord.endsWith('くる') || dictWord.endsWith('来る')) return dictWord.slice(0, -2);
+        }
+        return dictWord.length > 1 ? dictWord.slice(0, -1) : dictWord;
+    }
+
     async function openExplorer() {
         showScreen('explorer-screen');
-        if (explorerInitialized) return; // 一度構築したら再利用（verbデータはdataStoreにキャッシュ済み）
+        if (explorerInitialized) return; // 一度構築したら再利用（explorerデータはdataStoreにキャッシュ済み）
 
-        const data = await fetchData('verb');
+        const data = await fetchData('explorer');
         if (data.length <= 1) {
             explorerShowFatalError('動詞データの読み込みに失敗しました。ネットワーク接続を確認してください。');
             return;
@@ -664,7 +683,7 @@
             });
 
             dataRows.forEach((row, i) => {
-                const rowIndex = i + 1; // dataStore.verb 内の実インデックス（ヘッダー分+1）
+                const rowIndex = i + 1; // dataStore.explorer 内の実インデックス（ヘッダー分+1）
                 const cellValue = row[colIdx];
                 if (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') {
                     const opt = document.createElement('option');
@@ -682,7 +701,7 @@
 
     // 全ピッカー・語幹・活用形カードをターゲット行に同期する
     function explorerUpdateData(rowIndex) {
-        const data = dataStore.verb;
+        const data = dataStore.explorer;
         if (rowIndex < 1 || rowIndex >= data.length) return;
         const row = data[rowIndex];
 
@@ -691,11 +710,14 @@
             select.value = rowIndex;
         });
 
-        // ② 語幹を表示（シートの値をそのまま使用、自動計算はしない）
-        const stemValue = (explorerStemColIdx !== -1 && row[explorerStemColIdx]) ? row[explorerStemColIdx].trim() : '';
+        // ② 語幹を表示。シートの語幹列に値があればそれを優先し、
+        //    空欄の場合のみ辞書形＋グループから自動計算したフォールバック値を使う。
+        let stemValue = (explorerStemColIdx !== -1 && row[explorerStemColIdx]) ? row[explorerStemColIdx].trim() : '';
+        if (stemValue === '') stemValue = explorerComputeFallbackStem(row);
         document.getElementById('explorer-stem-display').innerText = stemValue === '' ? '-' : stemValue;
 
-        // ③ 活用形カードを生成
+        // ③ 活用形カードを縦並びで生成。各カードは「語幹」+「活用語尾」を視覚的に分けて表示し、
+        //    学生が「語幹は変わらず、後ろだけが活用する」ことを直感的に理解できるようにする。
         const scroller = document.getElementById('explorer-cards-scroller');
         scroller.innerHTML = '';
 
@@ -707,7 +729,7 @@
         explorerConjugationColIdxs.forEach(colIdx => {
             const columnName = explorerColumns[colIdx];
             const cellValue = row[colIdx];
-            const value = (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') ? cellValue.trim() : '---';
+            const fullValue = (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') ? cellValue.trim() : '';
 
             const cardDiv = document.createElement('div');
             cardDiv.className = 'explorer-card';
@@ -715,17 +737,35 @@
             const cardLabel = document.createElement('div');
             cardLabel.className = 'explorer-card-label';
             cardLabel.innerText = columnName;
+            cardDiv.appendChild(cardLabel);
 
             const cardValue = document.createElement('div');
             cardValue.className = 'explorer-card-value';
-            cardValue.innerText = value;
 
-            cardDiv.appendChild(cardLabel);
+            if (fullValue === '') {
+                cardValue.innerText = '---';
+            } else if (stemValue !== '' && fullValue.startsWith(stemValue) && fullValue.length > stemValue.length) {
+                // 語幹部分と活用語尾部分を分けて、語幹をハイライト表示する
+                const stemSpan = document.createElement('span');
+                stemSpan.className = 'explorer-stem-part';
+                stemSpan.innerText = stemValue;
+
+                const suffixSpan = document.createElement('span');
+                suffixSpan.className = 'explorer-suffix-part';
+                suffixSpan.innerText = fullValue.slice(stemValue.length);
+
+                cardValue.appendChild(stemSpan);
+                cardValue.appendChild(suffixSpan);
+            } else {
+                // 語幹と一致しない（不規則活用など）場合はそのまま表示
+                cardValue.innerText = fullValue;
+            }
+
             cardDiv.appendChild(cardValue);
             scroller.appendChild(cardDiv);
         });
 
-        scroller.scrollLeft = 0;
+        scroller.scrollTop = 0;
     }
 </script>
 </body>
