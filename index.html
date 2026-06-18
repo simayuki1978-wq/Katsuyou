@@ -166,6 +166,74 @@
             transition: background-color 0.3s, color 0.3s;
         }
         .error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
+
+        /* ── 6. 動詞エクスプローラー ── */
+        .explorer-wrapper {
+            display: flex; flex-direction: column; flex: 1;
+        }
+        .explorer-section-title {
+            font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+            color: var(--text); opacity: 0.55; margin-bottom: 10px; text-transform: uppercase;
+        }
+        .explorer-upper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px; margin-bottom: 24px;
+        }
+        .explorer-picker-group { display: flex; flex-direction: column; }
+        .explorer-picker-label {
+            font-size: 10px; color: var(--text); opacity: 0.6;
+            margin-bottom: 4px; font-weight: 500;
+            text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+        }
+        .explorer-select {
+            width: 100%; padding: 12px 14px; font-size: 14px; font-weight: 500;
+            background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px;
+            color: var(--text); outline: none; cursor: pointer; appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 12px;
+        }
+        .explorer-select:focus { border-color: var(--primary); }
+        .explorer-lower-layout {
+            display: flex; align-items: center;
+            background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 16px;
+            padding: 16px; overflow: hidden; margin-bottom: 16px;
+        }
+        .explorer-stem-sticky {
+            flex-shrink: 0; width: 84px; text-align: center;
+            background-color: var(--primary); color: white;
+            padding: 14px 6px; border-radius: 12px;
+            margin-right: 14px; z-index: 2;
+        }
+        .explorer-stem-label {
+            display: block; font-size: 9px; color: rgba(255,255,255,0.8);
+            letter-spacing: 0.05em; margin-bottom: 2px;
+        }
+        .explorer-stem-value { font-size: 17px; font-weight: 700; letter-spacing: 0.05em; }
+        .explorer-scroller {
+            display: flex; gap: 10px; overflow-x: auto; flex-grow: 1;
+            padding: 4px 0 8px 0; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+        }
+        .explorer-scroller::-webkit-scrollbar { height: 5px; }
+        .explorer-scroller::-webkit-scrollbar-track { background: transparent; }
+        .explorer-scroller::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        .explorer-card {
+            flex-shrink: 0; width: 105px;
+            background-color: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+            padding: 12px 8px; text-align: center;
+        }
+        .explorer-card-label {
+            font-size: 9px; color: var(--text); opacity: 0.55; margin-bottom: 6px; font-weight: 600;
+            text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+        }
+        .explorer-card-value { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+        .explorer-error {
+            grid-column: 1 / -1; text-align: center; padding: 20px;
+            color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
+            border-radius: 12px; font-size: 13px; line-height: 1.6;
+        }
+        .explorer-loading { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text); opacity: 0.6; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -183,6 +251,7 @@
             <button class="btn btn-blue" onclick="openFlashcard('adj')">📗 形容詞カード</button>
             <button class="btn" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">📝 例文カード</button>
             <button class="btn" style="background:#ffc800; border-color:#e5a500; color:#333;" onclick="openQuiz()">🎯 クイズ</button>
+            <button class="btn" style="background:#ff9600; border-color:#e58200;" onclick="openExplorer()">🔍 動詞エクスプローラー</button>
         </div>
     </div>
 
@@ -222,6 +291,26 @@
             <button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表</button>
             <button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen')">← 戻る</button>
         </div>
+    </div>
+
+    <!-- 動詞エクスプローラー画面 -->
+    <div id="explorer-screen" class="screen">
+        <div class="explorer-wrapper">
+            <div class="explorer-section-title">動詞プロパティ</div>
+            <div id="explorer-pickers-container" class="explorer-upper-grid">
+                <div class="explorer-loading">データを読み込み中...</div>
+            </div>
+
+            <div class="explorer-section-title">活用形</div>
+            <div class="explorer-lower-layout">
+                <div class="explorer-stem-sticky">
+                    <span class="explorer-stem-label">語幹</span>
+                    <div id="explorer-stem-display" class="explorer-stem-value">---</div>
+                </div>
+                <div id="explorer-cards-scroller" class="explorer-scroller"></div>
+            </div>
+        </div>
+        <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る</button>
     </div>
 </div>
 
@@ -288,7 +377,8 @@
         'top-screen':   '日本語活用マスター',
         'table-screen': '📋 活用システム',
         'card-screen':  '📘 フラッシュカード',
-        'quiz-screen':  '🎯 クイズ'
+        'quiz-screen':  '🎯 クイズ',
+        'explorer-screen': '🔍 動詞エクスプローラー'
     };
 
     function showScreen(id) {
@@ -449,6 +539,193 @@
         if (isCorrect) {
             setTimeout(() => { submitBtn.innerText = '答え合わせ'; }, 1000);
         }
+    }
+
+    // ── 6. 動詞エクスプローラー ──
+    // verbシートの確定済みヘッダー構成（A〜N列）:
+    // ID, 辞書形, ふりがな, グループ, 英語の意味(English), 意味（ベトナム語等の参考用）,
+    // 語幹, ない形, ます形, 辞書形, 条件形, 意向形, て形, た形
+    const EXPLORER_KEY_COLUMN_HINTS = ["辞書形"];
+    const EXPLORER_GROUP_COLUMN_HINTS = ["グループ"];
+    const EXPLORER_STEM_COLUMN_HINTS = ["語幹"];
+    // プロパティ（上部ピッカー）として表示する列：辞書形・ふりがな・グループ・英語の意味・参考意味
+    const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "ふりがな", "グループ", "英語の意味", "意味"];
+    // 活用形（下部カード）として表示する列：ない形・ます形・辞書形(活用形側)・条件形・意向形・て形・た形
+    const EXPLORER_CONJUGATION_HINTS = ["形"];
+
+    let explorerColumns = [];          // ヘッダー名の配列（重複あり得る）
+    let explorerKeyColIdx = -1;        // 辞書形（見出し語として使う：最初に出てくる方）
+    let explorerGroupColIdx = -1;      // グループ
+    let explorerStemColIdx = -1;       // 語幹
+    let explorerPropertyColIdxs = [];  // 上部ピッカー対象の列インデックス
+    let explorerConjugationColIdxs = []; // 下部カード対象の列インデックス
+    let explorerInitialized = false;
+
+    async function openExplorer() {
+        showScreen('explorer-screen');
+        if (explorerInitialized) return; // 一度構築したら再利用（verbデータはdataStoreにキャッシュ済み）
+
+        const data = await fetchData('verb');
+        if (data.length <= 1) {
+            explorerShowFatalError('動詞データの読み込みに失敗しました。ネットワーク接続を確認してください。');
+            return;
+        }
+        explorerResolveColumns(data[0]);
+        explorerInitPickers(data);
+        explorerUpdateData(1); // 最初の動詞（ヘッダーの次の行）を表示
+        explorerInitialized = true;
+    }
+
+    function explorerShowFatalError(message) {
+        const container = document.getElementById('explorer-pickers-container');
+        if (container) {
+            container.innerHTML = `<div class="explorer-error">⚠ ${message}</div>`;
+        }
+        const scroller = document.getElementById('explorer-cards-scroller');
+        if (scroller) scroller.innerHTML = '';
+        const stemDisplay = document.getElementById('explorer-stem-display');
+        if (stemDisplay) stemDisplay.innerText = '-';
+    }
+
+    // ヘッダー名（文字列配列）から各列の役割をインデックスとして解決する。
+    // 「辞書形」はB列とJ列の2か所に存在するため、最初に見つかった方を見出し語キーとして使う。
+    function explorerResolveColumns(headerRow) {
+        explorerColumns = headerRow;
+
+        explorerKeyColIdx = explorerColumns.findIndex(c => EXPLORER_KEY_COLUMN_HINTS.some(h => c.includes(h)));
+        explorerGroupColIdx = explorerColumns.findIndex(c => EXPLORER_GROUP_COLUMN_HINTS.some(h => c.includes(h)));
+        explorerStemColIdx = explorerColumns.findIndex(c => EXPLORER_STEM_COLUMN_HINTS.some(h => c.includes(h)));
+
+        if (explorerKeyColIdx === -1) {
+            console.warn('「辞書形」列が見つかりません。フォールバックでB列(index1)を使用します。');
+            explorerKeyColIdx = 1;
+        }
+        if (explorerStemColIdx === -1) {
+            console.warn('「語幹」列が見つかりません。語幹表示は空欄になります。');
+        }
+
+        // プロパティ列：ヒントに一致する列のうち、ID列(0)は除外。
+        // 「辞書形」はB列・J列の2か所に存在するが、見出し語として使う最初の出現（=explorerKeyColIdx）
+        // のみをプロパティ扱いにし、2回目以降の「辞書形」(J列)は活用形セクション側に回す。
+        explorerPropertyColIdxs = explorerColumns
+            .map((c, idx) => ({ c, idx }))
+            .filter(({ c, idx }) => {
+                if (idx === 0) return false;
+                if (c.includes('辞書形')) return idx === explorerKeyColIdx;
+                return EXPLORER_PROPERTY_COLUMN_HINTS.some(h => c.includes(h));
+            })
+            .map(({ idx }) => idx);
+
+        // 活用形列：見出しに「形」を含み、かつプロパティ列に含まれていない列
+        // （「ない形」「ます形」「辞書形」(J列)「条件形」「意向形」「て形」「た形」が該当）
+        explorerConjugationColIdxs = explorerColumns
+            .map((c, idx) => ({ c, idx }))
+            .filter(({ c, idx }) =>
+                EXPLORER_CONJUGATION_HINTS.some(h => c.includes(h)) &&
+                idx !== explorerStemColIdx &&
+                !explorerPropertyColIdxs.includes(idx)
+            )
+            .map(({ idx }) => idx);
+
+        if (explorerConjugationColIdxs.length === 0) {
+            console.warn('活用形セクションに該当する列が見つかりませんでした。');
+        }
+    }
+
+    // 上部ピッカー群を生成。各ドロップダウンの選択肢は「行インデックス」をvalueに持つ。
+    function explorerInitPickers(data) {
+        const container = document.getElementById('explorer-pickers-container');
+        container.innerHTML = '';
+
+        if (explorerPropertyColIdxs.length === 0) {
+            container.innerHTML = '<div class="explorer-error">⚠ 表示できる動詞プロパティ列が見つかりませんでした。</div>';
+            return;
+        }
+
+        const headerRow = data[0];
+        const dataRows = data.slice(1);
+
+        explorerPropertyColIdxs.forEach(colIdx => {
+            const columnName = headerRow[colIdx];
+
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'explorer-picker-group';
+
+            const label = document.createElement('label');
+            label.className = 'explorer-picker-label';
+            label.innerText = columnName;
+
+            const select = document.createElement('select');
+            select.dataset.colIdx = colIdx;
+            select.className = 'explorer-select';
+
+            select.addEventListener('change', function(e) {
+                explorerUpdateData(parseInt(e.target.value, 10));
+            });
+
+            dataRows.forEach((row, i) => {
+                const rowIndex = i + 1; // dataStore.verb 内の実インデックス（ヘッダー分+1）
+                const cellValue = row[colIdx];
+                if (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') {
+                    const opt = document.createElement('option');
+                    opt.value = rowIndex;
+                    opt.innerText = cellValue.trim();
+                    select.appendChild(opt);
+                }
+            });
+
+            groupDiv.appendChild(label);
+            groupDiv.appendChild(select);
+            container.appendChild(groupDiv);
+        });
+    }
+
+    // 全ピッカー・語幹・活用形カードをターゲット行に同期する
+    function explorerUpdateData(rowIndex) {
+        const data = dataStore.verb;
+        if (rowIndex < 1 || rowIndex >= data.length) return;
+        const row = data[rowIndex];
+
+        // ① 全ピッカーの選択位置を同期
+        document.querySelectorAll('#explorer-pickers-container .explorer-select').forEach(select => {
+            select.value = rowIndex;
+        });
+
+        // ② 語幹を表示（シートの値をそのまま使用、自動計算はしない）
+        const stemValue = (explorerStemColIdx !== -1 && row[explorerStemColIdx]) ? row[explorerStemColIdx].trim() : '';
+        document.getElementById('explorer-stem-display').innerText = stemValue === '' ? '-' : stemValue;
+
+        // ③ 活用形カードを生成
+        const scroller = document.getElementById('explorer-cards-scroller');
+        scroller.innerHTML = '';
+
+        if (explorerConjugationColIdxs.length === 0) {
+            scroller.innerHTML = '<div class="explorer-error">⚠ 表示できる活用形列が見つかりませんでした。</div>';
+            return;
+        }
+
+        explorerConjugationColIdxs.forEach(colIdx => {
+            const columnName = explorerColumns[colIdx];
+            const cellValue = row[colIdx];
+            const value = (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') ? cellValue.trim() : '---';
+
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'explorer-card';
+
+            const cardLabel = document.createElement('div');
+            cardLabel.className = 'explorer-card-label';
+            cardLabel.innerText = columnName;
+
+            const cardValue = document.createElement('div');
+            cardValue.className = 'explorer-card-value';
+            cardValue.innerText = value;
+
+            cardDiv.appendChild(cardLabel);
+            cardDiv.appendChild(cardValue);
+            scroller.appendChild(cardDiv);
+        });
+
+        scroller.scrollLeft = 0;
     }
 </script>
 </body>
