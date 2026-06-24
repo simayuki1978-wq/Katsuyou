@@ -44,7 +44,6 @@
         }
         .active { display: flex; }
 
-        /* ボタン */
         .btn {
             background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
             padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
@@ -57,33 +56,22 @@
             color: var(--text);
         }
 
-        /* ── 1. 活用システム ── */
         .table-container {
             overflow-x: auto; overflow-y: auto;
             border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px;
             flex: 1;
         }
-        /* 説明列（2列目以降のテキスト）は2〜3行で折り返す */
         table { border-collapse: collapse; width: 100%; }
         th, td {
             border: 1px solid var(--border);
             padding: 5px 5px; text-align: center;
             background-color: var(--card-bg); color: var(--text);
-            font-size: 13px;          /* ★字を大きく */
-            white-space: normal;      /* ★折り返しON → 列幅が狭くなる */
-            word-break: break-all;
-            max-width: 70px;          /* ★各列の最大幅を制限 */
-            line-height: 1.4;
+            font-size: 13px; white-space: normal; word-break: break-all;
+            max-width: 70px; line-height: 1.4;
         }
         th { background-color: var(--primary); color: white; font-weight: bold; white-space: nowrap; }
 
-        /* ── フラッシュカード共通 ── */
-        .card-container {
-            perspective: 1000px;
-            height: 360px;
-            margin: 12px 0;
-            flex-shrink: 0;
-        }
+        .card-container { perspective: 1000px; height: 360px; margin: 12px 0; flex-shrink: 0; }
         .card {
             width: 100%; height: 100%; position: relative;
             transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer;
@@ -98,66 +86,40 @@
             box-shadow: 0 4px 0 var(--border);
             text-align: center; overflow: hidden;
         }
-        /* ── 2. 動詞カード ── */
-        .verb-front { font-size: clamp(20px, 6vw, 28px); }   /* ★大きく */
-        /* 裏面 */
+        .verb-front { font-size: clamp(20px, 6vw, 28px); }
         .card-back {
-            transform: rotateY(180deg);
-            overflow-y: auto;
-            justify-content: flex-start;
-            padding-top: 14px;
-            font-size: 14px;
+            transform: rotateY(180deg); overflow-y: auto;
+            justify-content: flex-start; padding-top: 14px; font-size: 14px;
         }
-
-        /* 動詞カード裏面テーブル（縦並び） */
         .back-table { width: 100%; border-collapse: collapse; }
         .back-table th {
             background-color: var(--primary); color: white;
             padding: 7px 10px; font-size: 13px; white-space: nowrap;
-            border: 1px solid var(--dark-green);
-            text-align: left; width: 45%;
+            border: 1px solid var(--dark-green); text-align: left; width: 45%;
         }
-        .back-table td {
-            padding: 7px 10px; border: 1px solid var(--border);
-            font-size: 16px; font-weight: bold; text-align: left;  /* ★大きく */
-        }
-
-        /* ── 3. 形容詞カード ── */
-        .adj-front { font-size: clamp(20px, 6vw, 28px); }    /* ★大きく */
-        .adj-back  { font-size: clamp(16px, 5vw, 22px); justify-content: center; }  /* ★大きく */
-
-        /* ── 4. 例文カード ── */
-        .example-front { font-size: clamp(18px, 5.5vw, 26px); }  /* ★大きく */
-        .example-back  { font-size: clamp(16px, 5vw, 24px); justify-content: center; } /* ★大きく */
-
+        .back-table td { padding: 7px 10px; border: 1px solid var(--border); font-size: 16px; font-weight: bold; text-align: left; }
+        .adj-front { font-size: clamp(20px, 6vw, 28px); }
+        .adj-back  { font-size: clamp(16px, 5vw, 22px); justify-content: center; }
+        .example-front { font-size: clamp(18px, 5.5vw, 26px); }
+        .example-back  { font-size: clamp(16px, 5vw, 24px); justify-content: center; }
         .card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
 
-        /* ── 5. クイズ ── */
         #quiz-q-container {
-            min-height: 120px; margin-bottom: 6px;   /* ★margin小さく */
+            min-height: 120px; margin-bottom: 6px;
             border: 2px solid var(--border); border-radius: 25px;
             background-color: var(--card-bg); color: var(--text);
             display: flex; align-items: center; justify-content: center;
             padding: 16px; box-sizing: border-box; text-align: center;
-            box-shadow: 0 4px 0 var(--border); font-size: 18px;
-            flex-shrink: 0;
+            box-shadow: 0 4px 0 var(--border); font-size: 18px; flex-shrink: 0;
         }
-        #quiz-feedback {
-            font-weight: bold; font-size: 20px;
-            margin: 4px 0; height: 26px; text-align: center;  /* ★margin削減 */
-        }
-        #quiz-answer-reveal {
-            font-size: 15px; color: #ff4b4b;
-            margin-bottom: 4px; min-height: 20px;             /* ★margin削減 */
-            text-align: center; font-weight: bold;
-        }
+        #quiz-feedback { font-weight: bold; font-size: 20px; margin: 4px 0; height: 26px; text-align: center; }
+        #quiz-answer-reveal { font-size: 15px; color: #ff4b4b; margin-bottom: 4px; min-height: 20px; text-align: center; font-weight: bold; }
         .quiz-input {
             width: 100%; padding: 12px; border-radius: 15px; border: 2px solid var(--border);
             margin-bottom: 8px; font-size: 18px; box-sizing: border-box;
             background-color: var(--card-bg); color: var(--text);
         }
         .quiz-input:focus { outline: none; border-color: var(--primary); }
-
         .nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .mode-toggle {
             font-size: 12px; cursor: pointer; padding: 5px 10px;
@@ -167,10 +129,8 @@
         }
         .error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
 
-        /* ── 6. 動詞エクスプローラー ── */
-        .explorer-wrapper {
-            display: flex; flex-direction: column; flex: 1;
-        }
+        /* ── 動詞エクスプローラー ── */
+        .explorer-wrapper { display: flex; flex-direction: column; flex: 1; }
         .explorer-section-title {
             font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
             color: var(--text); opacity: 0.55; margin-bottom: 10px; text-transform: uppercase;
@@ -189,50 +149,122 @@
         .explorer-select {
             width: 100%; padding: 12px 14px; font-size: 14px; font-weight: 500;
             background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px;
-            color: var(--text); outline: none; cursor: pointer; appearance: none;
-            -webkit-appearance: none;
+            color: var(--text); outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
             background-repeat: no-repeat; background-position: right 12px center; background-size: 12px;
         }
         .explorer-select:focus { border-color: var(--primary); }
-        .explorer-lower-layout {
-            display: flex; flex-direction: column;
-            background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 16px;
-            padding: 16px; margin-bottom: 16px;
+
+        /* ── ドラムスクロール本体 ── */
+        .explorer-drum-wrapper {
+            display: flex;
+            align-items: stretch;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            /* ドラムの高さ：3行分見えて上下がフェードアウトする */
+            height: 216px;
+            position: relative;
         }
-        .explorer-scroller {
-            display: flex; flex-direction: column; gap: 10px;
-            overflow-y: auto; max-height: 50vh;
-            padding: 2px 2px 4px 2px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+
+        /* フェードアウトオーバーレイ（上下）*/
+        .explorer-drum-wrapper::before,
+        .explorer-drum-wrapper::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            height: 72px;
+            z-index: 3;
+            pointer-events: none;
         }
-        .explorer-scroller::-webkit-scrollbar { width: 5px; }
-        .explorer-scroller::-webkit-scrollbar-track { background: transparent; }
-        .explorer-scroller::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-        /* 各行：左端に語幹（固定幅・強調）、右側にその活用形ラベルと値を続けて表示。
-           視線が「語幹 → 活用形」と自然に左から右へ流れるようにする。 */
-        .explorer-card {
-            flex-shrink: 0; width: 100%; box-sizing: border-box;
-            background-color: var(--bg); border: 1px solid var(--border); border-radius: 10px;
-            display: flex; align-items: stretch; overflow: hidden;
+        .explorer-drum-wrapper::before {
+            top: 0;
+            background: linear-gradient(to bottom, var(--card-bg) 0%, transparent 100%);
         }
-        .explorer-card-stem {
-            flex-shrink: 0; width: 72px;
-            background-color: var(--primary); color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; font-weight: 700; letter-spacing: 0.03em;
-            padding: 10px 6px; text-align: center;
+        .explorer-drum-wrapper::after {
+            bottom: 0;
+            background: linear-gradient(to top, var(--card-bg) 0%, transparent 100%);
         }
-        .explorer-card-body {
-            flex: 1; min-width: 0;
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-            padding: 10px 14px;
+
+        /* 中央ハイライト枠 */
+        .explorer-drum-highlight {
+            position: absolute;
+            left: 0; right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 72px;
+            border-top: 2px solid var(--border);
+            border-bottom: 2px solid var(--border);
+            z-index: 2;
+            pointer-events: none;
         }
-        .explorer-card-label {
-            font-size: 11px; color: var(--text); opacity: 0.55; font-weight: 600;
+
+        /* 語幹：左端固定、縦中央に1つだけ */
+        .explorer-stem-fixed {
+            flex-shrink: 0;
+            width: 110px;                  /* ★「持っていく」が折り返さない幅 */
+            background-color: #2d6a2d;     /* ★暗い緑 */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-align: center;
+            padding: 0 8px;
+            z-index: 4;
+            position: relative;
+        }
+
+        /* ドラムスクロール列 */
+        .explorer-drum-scroller {
+            flex: 1;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            -webkit-overflow-scrolling: touch;
+            /* スクロールバー非表示 */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .explorer-drum-scroller::-webkit-scrollbar { display: none; }
+
+        /* ダミーパディング：先頭・末尾に空白を入れることで
+           最初と最後のアイテムも中央スナップできるようにする */
+        .explorer-drum-padding {
+            height: 72px;          /* カード1枚分の高さと同じ */
             flex-shrink: 0;
         }
-        .explorer-card-value { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: right; }
+
+        /* 各活用形セル */
+        .explorer-drum-item {
+            height: 72px;
+            scroll-snap-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            box-sizing: border-box;
+            gap: 12px;
+        }
+        .explorer-drum-label {
+            font-size: 11px;
+            color: var(--text);
+            opacity: 0.55;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .explorer-drum-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.02em;
+            text-align: right;
+        }
         .explorer-suffix-part { color: var(--primary); }
+
         .explorer-error {
             grid-column: 1 / -1; text-align: center; padding: 20px;
             color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
@@ -307,8 +339,21 @@
             </div>
 
             <div class="explorer-section-title">活用形</div>
-            <div class="explorer-lower-layout">
-                <div id="explorer-cards-scroller" class="explorer-scroller"></div>
+
+            <!-- ドラムスクロール本体 -->
+            <div class="explorer-drum-wrapper">
+                <!-- 中央ハイライト -->
+                <div class="explorer-drum-highlight"></div>
+
+                <!-- 左端：語幹（固定・1つだけ） -->
+                <div class="explorer-stem-fixed" id="explorer-stem-fixed">---</div>
+
+                <!-- 右側：活用形のドラムスクロール -->
+                <div class="explorer-drum-scroller" id="explorer-drum-scroller">
+                    <div class="explorer-drum-padding"></div>
+                    <!-- ここに .explorer-drum-item が動的に挿入される -->
+                    <div class="explorer-drum-padding"></div>
+                </div>
             </div>
         </div>
         <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る</button>
@@ -376,10 +421,10 @@
     }
 
     const SCREEN_TITLES = {
-        'top-screen':   '日本語活用マスター',
-        'table-screen': '📋 活用システム',
-        'card-screen':  '📘 フラッシュカード',
-        'quiz-screen':  '🎯 クイズ',
+        'top-screen':      '日本語活用マスター',
+        'table-screen':    '📋 活用システム',
+        'card-screen':     '📘 フラッシュカード',
+        'quiz-screen':     '🎯 クイズ',
         'explorer-screen': '🔍 動詞エクスプローラー'
     };
 
@@ -444,16 +489,12 @@
         const frontEl = document.getElementById('card-front-content');
         const backEl  = document.getElementById('card-back-content');
 
-        // クラスをリセット
         frontEl.className = 'card-face card-front';
         backEl.className  = 'card-face card-back';
 
         if (currentMode === 'verb') {
-            // ── 2. 動詞カード ──
             frontEl.classList.add('verb-front');
             frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
-
-            // 裏面: E〜L列（index 4〜11）縦並びテーブル
             const headers = data[0];
             let tableHtml = '<table class="back-table">';
             for (let i = 4; i <= 11 && i < headers.length; i++) {
@@ -461,16 +502,12 @@
                 tableHtml += `<tr><th>${headers[i]}</th><td>${row[i] || '―'}</td></tr>`;
             }
             backEl.innerHTML = tableHtml + '</table>';
-
         } else if (currentMode === 'adj') {
-            // ── 3. 形容詞カード ──
             frontEl.classList.add('adj-front');
             backEl.classList.add('adj-back');
             frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
             backEl.innerHTML  = row.slice(4).filter(Boolean).join('<br>') || '（裏面データなし）';
-
         } else if (currentMode === 'example') {
-            // ── 4. 例文カード: A〜C列を表面、J列（index 9）だけを裏面 ──
             frontEl.classList.add('example-front');
             backEl.classList.add('example-back');
             frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
@@ -543,29 +580,21 @@
         }
     }
 
-    // ── 6. 動詞エクスプローラー ──
-    // verbシートの確定済みヘッダー構成（A〜N列）:
-    // ID, 辞書形, ふりがな, グループ, 英語の意味(English), 意味（ベトナム語等の参考用）,
-    // 語幹, ない形, ます形, 辞書形, 条件形, 意向形, て形, た形
-    // ※explorer専用シートのヘッダー名は実際には未確認のため、複数のヒント候補で柔軟に判定する
-    const EXPLORER_KEY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞"];
-    const EXPLORER_GROUP_COLUMN_HINTS = ["グループ", "活用グループ", "種類"];
-    const EXPLORER_STEM_COLUMN_HINTS = ["語幹"];
-    // プロパティ（上部ピッカー）として表示する列：辞書形・ふりがな・グループ・英語の意味・参考意味
+    // ── 6. 動詞エクスプローラー（ドラムスクロール版）──
+    const EXPLORER_KEY_COLUMN_HINTS    = ["辞書形", "見出し語", "動詞"];
+    const EXPLORER_GROUP_COLUMN_HINTS  = ["グループ", "活用グループ", "種類"];
+    const EXPLORER_STEM_COLUMN_HINTS   = ["語幹"];
     const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞", "ふりがな", "読み", "グループ", "活用グループ", "種類", "英語の意味", "意味"];
-    // 活用形（下部カード）として表示する列：ない形・ます形・辞書形(活用形側)・条件形・意向形・て形・た形
-    const EXPLORER_CONJUGATION_HINTS = ["形", "活用"];
+    const EXPLORER_CONJUGATION_HINTS   = ["形", "活用"];
 
-    let explorerColumns = [];          // ヘッダー名の配列（重複あり得る）
-    let explorerKeyColIdx = -1;        // 辞書形（見出し語として使う：最初に出てくる方）
-    let explorerGroupColIdx = -1;      // グループ
-    let explorerStemColIdx = -1;       // 語幹
-    let explorerPropertyColIdxs = [];  // 上部ピッカー対象の列インデックス
-    let explorerConjugationColIdxs = []; // 下部カード対象の列インデックス
+    let explorerColumns = [];
+    let explorerKeyColIdx = -1;
+    let explorerGroupColIdx = -1;
+    let explorerStemColIdx = -1;
+    let explorerPropertyColIdxs = [];
+    let explorerConjugationColIdxs = [];
     let explorerInitialized = false;
 
-    // シートに語幹列が無い、または値が空の場合のフォールバック自動計算
-    // （元のv-sync実装のロジックを継承）
     function explorerComputeFallbackStem(row) {
         const dictWord = explorerKeyColIdx !== -1 && row[explorerKeyColIdx] ? row[explorerKeyColIdx].trim() : '';
         const groupNum = explorerGroupColIdx !== -1 && row[explorerGroupColIdx] ? parseInt(row[explorerGroupColIdx], 10) : 1;
@@ -579,7 +608,7 @@
 
     async function openExplorer() {
         showScreen('explorer-screen');
-        if (explorerInitialized) return; // 一度構築したら再利用（explorerデータはdataStoreにキャッシュ済み）
+        if (explorerInitialized) return;
 
         const data = await fetchData('explorer');
         if (data.length <= 1) {
@@ -588,39 +617,25 @@
         }
         explorerResolveColumns(data[0]);
         explorerInitPickers(data);
-        explorerUpdateData(1); // 最初の動詞（ヘッダーの次の行）を表示
+        explorerUpdateData(1);
         explorerInitialized = true;
     }
 
     function explorerShowFatalError(message) {
         const container = document.getElementById('explorer-pickers-container');
-        if (container) {
-            container.innerHTML = `<div class="explorer-error">⚠ ${message}</div>`;
-        }
-        const scroller = document.getElementById('explorer-cards-scroller');
+        if (container) container.innerHTML = `<div class="explorer-error">⚠ ${message}</div>`;
+        const scroller = document.getElementById('explorer-drum-scroller');
         if (scroller) scroller.innerHTML = '';
     }
 
-    // ヘッダー名（文字列配列）から各列の役割をインデックスとして解決する。
-    // 「辞書形」はB列とJ列の2か所に存在するため、最初に見つかった方を見出し語キーとして使う。
     function explorerResolveColumns(headerRow) {
         explorerColumns = headerRow;
-
-        explorerKeyColIdx = explorerColumns.findIndex(c => EXPLORER_KEY_COLUMN_HINTS.some(h => c.includes(h)));
+        explorerKeyColIdx   = explorerColumns.findIndex(c => EXPLORER_KEY_COLUMN_HINTS.some(h => c.includes(h)));
         explorerGroupColIdx = explorerColumns.findIndex(c => EXPLORER_GROUP_COLUMN_HINTS.some(h => c.includes(h)));
-        explorerStemColIdx = explorerColumns.findIndex(c => EXPLORER_STEM_COLUMN_HINTS.some(h => c.includes(h)));
+        explorerStemColIdx  = explorerColumns.findIndex(c => EXPLORER_STEM_COLUMN_HINTS.some(h => c.includes(h)));
 
-        if (explorerKeyColIdx === -1) {
-            console.warn('「辞書形」列が見つかりません。フォールバックでB列(index1)を使用します。');
-            explorerKeyColIdx = 1;
-        }
-        if (explorerStemColIdx === -1) {
-            console.warn('「語幹」列が見つかりません。語幹表示は空欄になります。');
-        }
+        if (explorerKeyColIdx === -1) { console.warn('「辞書形」列が見つかりません。フォールバック使用。'); explorerKeyColIdx = 1; }
 
-        // プロパティ列：ヒントに一致する列のうち、ID列(0)は除外。
-        // 「辞書形」はB列・J列の2か所に存在するが、見出し語として使う最初の出現（=explorerKeyColIdx）
-        // のみをプロパティ扱いにし、2回目以降の「辞書形」(J列)は活用形セクション側に回す。
         explorerPropertyColIdxs = explorerColumns
             .map((c, idx) => ({ c, idx }))
             .filter(({ c, idx }) => {
@@ -630,8 +645,6 @@
             })
             .map(({ idx }) => idx);
 
-        // 活用形列：見出しに「形」を含み、かつプロパティ列に含まれていない列
-        // （「ない形」「ます形」「辞書形」(J列)「条件形」「意向形」「て形」「た形」が該当）
         explorerConjugationColIdxs = explorerColumns
             .map((c, idx) => ({ c, idx }))
             .filter(({ c, idx }) =>
@@ -641,12 +654,9 @@
             )
             .map(({ idx }) => idx);
 
-        if (explorerConjugationColIdxs.length === 0) {
-            console.warn('活用形セクションに該当する列が見つかりませんでした。');
-        }
+        if (explorerConjugationColIdxs.length === 0) console.warn('活用形セクションに該当する列が見つかりませんでした。');
     }
 
-    // 上部ピッカー群を生成。各ドロップダウンの選択肢は「行インデックス」をvalueに持つ。
     function explorerInitPickers(data) {
         const container = document.getElementById('explorer-pickers-container');
         container.innerHTML = '';
@@ -657,7 +667,7 @@
         }
 
         const headerRow = data[0];
-        const dataRows = data.slice(1);
+        const dataRows  = data.slice(1);
 
         explorerPropertyColIdxs.forEach(colIdx => {
             const columnName = headerRow[colIdx];
@@ -678,11 +688,11 @@
             });
 
             dataRows.forEach((row, i) => {
-                const rowIndex = i + 1; // dataStore.explorer 内の実インデックス（ヘッダー分+1）
+                const rowIndex  = i + 1;
                 const cellValue = row[colIdx];
                 if (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') {
                     const opt = document.createElement('option');
-                    opt.value = rowIndex;
+                    opt.value    = rowIndex;
                     opt.innerText = cellValue.trim();
                     select.appendChild(opt);
                 }
@@ -694,77 +704,72 @@
         });
     }
 
-    // 全ピッカー・活用形カードをターゲット行に同期する
     function explorerUpdateData(rowIndex) {
         const data = dataStore.explorer;
         if (rowIndex < 1 || rowIndex >= data.length) return;
         const row = data[rowIndex];
 
-        // ① 全ピッカーの選択位置を同期
-        document.querySelectorAll('#explorer-pickers-container .explorer-select').forEach(select => {
-            select.value = rowIndex;
+        // ① 全ピッカー同期
+        document.querySelectorAll('#explorer-pickers-container .explorer-select').forEach(sel => {
+            sel.value = rowIndex;
         });
 
-        // ② 語幹を算出。シートの語幹列に値があればそれを優先し、
-        //    空欄の場合のみ辞書形＋グループから自動計算したフォールバック値を使う。
+        // ② 語幹を算出・表示
         let stemValue = (explorerStemColIdx !== -1 && row[explorerStemColIdx]) ? row[explorerStemColIdx].trim() : '';
         if (stemValue === '') stemValue = explorerComputeFallbackStem(row);
+        document.getElementById('explorer-stem-fixed').innerText = stemValue === '' ? '-' : stemValue;
 
-        // ③ 活用形カードを縦並びで生成。各カードの左端に語幹を固定表示し、
-        //    右側にその活用形のラベルと「語幹に続く部分」を表示することで、
-        //    視線が「語幹 → 活用形」と自然に左から右へ流れるようにする。
-        const scroller = document.getElementById('explorer-cards-scroller');
-        scroller.innerHTML = '';
+        // ③ ドラムスクロールの中身を再構築
+        const scroller = document.getElementById('explorer-drum-scroller');
 
         if (explorerConjugationColIdxs.length === 0) {
             scroller.innerHTML = '<div class="explorer-error">⚠ 表示できる活用形列が見つかりませんでした。</div>';
             return;
         }
 
+        // 先頭・末尾のパディング（中央スナップを可能にする）
+        scroller.innerHTML = '';
+        const topPad = document.createElement('div');
+        topPad.className = 'explorer-drum-padding';
+        scroller.appendChild(topPad);
+
         explorerConjugationColIdxs.forEach(colIdx => {
             const columnName = explorerColumns[colIdx];
-            const cellValue = row[colIdx];
-            const fullValue = (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') ? cellValue.trim() : '';
+            const cellValue  = row[colIdx];
+            const fullValue  = (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') ? cellValue.trim() : '';
 
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'explorer-card';
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'explorer-drum-item';
 
-            // 左端：語幹を固定表示（カードごとに繰り返し表示することで「ここから始まる」ことを強調）
-            const stemBlock = document.createElement('div');
-            stemBlock.className = 'explorer-card-stem';
-            stemBlock.innerText = stemValue === '' ? '-' : stemValue;
-            cardDiv.appendChild(stemBlock);
+            const labelEl = document.createElement('div');
+            labelEl.className = 'explorer-drum-label';
+            labelEl.innerText = columnName;
 
-            // 右側：ラベルと値（値は語幹部分を除いた続きだけをハイライト色で表示）
-            const bodyDiv = document.createElement('div');
-            bodyDiv.className = 'explorer-card-body';
-
-            const cardLabel = document.createElement('div');
-            cardLabel.className = 'explorer-card-label';
-            cardLabel.innerText = columnName;
-            bodyDiv.appendChild(cardLabel);
-
-            const cardValue = document.createElement('div');
-            cardValue.className = 'explorer-card-value';
+            const valueEl = document.createElement('div');
+            valueEl.className = 'explorer-drum-value';
 
             if (fullValue === '') {
-                cardValue.innerText = '---';
+                valueEl.innerText = '---';
             } else if (stemValue !== '' && fullValue.startsWith(stemValue) && fullValue.length > stemValue.length) {
-                // 語幹に続く活用語尾の部分だけを表示する（語幹は左端ブロックに既に出ているため重複させない）
+                // 活用語尾部分のみをハイライト色で表示
                 const suffixSpan = document.createElement('span');
                 suffixSpan.className = 'explorer-suffix-part';
                 suffixSpan.innerText = fullValue.slice(stemValue.length);
-                cardValue.appendChild(suffixSpan);
+                valueEl.appendChild(suffixSpan);
             } else {
-                // 語幹と一致しない（不規則活用など）場合は活用形全体をそのまま表示
-                cardValue.innerText = fullValue;
+                valueEl.innerText = fullValue;
             }
 
-            bodyDiv.appendChild(cardValue);
-            cardDiv.appendChild(bodyDiv);
-            scroller.appendChild(cardDiv);
+            itemDiv.appendChild(labelEl);
+            itemDiv.appendChild(valueEl);
+            scroller.appendChild(itemDiv);
         });
 
+        const botPad = document.createElement('div');
+        botPad.className = 'explorer-drum-padding';
+        scroller.appendChild(botPad);
+
+        // 動詞切り替え時はドラムを先頭（1つ目の活用形が中央）にリセット
         scroller.scrollTop = 0;
     }
 </script>
