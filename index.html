@@ -263,7 +263,7 @@
             letter-spacing: 0.02em;
             text-align: right;
         }
-        .explorer-suffix-part { color: var(--primary); }
+
 
         .explorer-error {
             grid-column: 1 / -1; text-align: center; padding: 20px;
@@ -748,17 +748,8 @@
             const valueEl = document.createElement('div');
             valueEl.className = 'explorer-drum-value';
 
-            if (fullValue === '') {
-                valueEl.innerText = '---';
-            } else if (stemValue !== '' && fullValue.startsWith(stemValue) && fullValue.length > stemValue.length) {
-                // 活用語尾部分のみをハイライト色で表示
-                const suffixSpan = document.createElement('span');
-                suffixSpan.className = 'explorer-suffix-part';
-                suffixSpan.innerText = fullValue.slice(stemValue.length);
-                valueEl.appendChild(suffixSpan);
-            } else {
-                valueEl.innerText = fullValue;
-            }
+            // 活用形の値はシートの値をそのまま全体表示する
+            valueEl.innerText = fullValue === '' ? '---' : fullValue;
 
             itemDiv.appendChild(labelEl);
             itemDiv.appendChild(valueEl);
