@@ -27,8 +27,6 @@
             background-color: var(--bg); color: var(--text);
             transition: background-color 0.3s, color 0.3s;
             box-shadow: 0 0 30px rgba(0,0,0,0.12);
-            /* クレジット分の下余白 */
-            padding-bottom: 28px;
             box-sizing: border-box;
         }
 
@@ -77,14 +75,9 @@
             padding: 6px 8px; text-align: center;
             background-color: var(--card-bg); color: var(--text);
             font-size: 12px;
-            /* 改行させない・はみ出したら横スクロールで対応 */
             white-space: nowrap;
             word-break: normal;
-        }
-        th {
-            background-color: var(--primary); color: white;
-            font-weight: bold; white-space: nowrap;
-            position: sticky; top: 0; z-index: 1;
+            width: auto;
         }
 
         /* ── フラッシュカード ── */
@@ -231,24 +224,13 @@
             color: var(--text); opacity: 0.6; font-size: 14px;
         }
 
-        /* ── クレジット（全画面左下固定） ── */
+        /* ── クレジット（各画面の一番上・左・太字） ── */
         .credit-bar {
-            position: fixed;
-            bottom: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 100%; max-width: 500px;
-            background-color: var(--bg);
-            border-top: 1px solid var(--border);
-            padding: 5px 12px;
-            font-size: 10px;
+            font-size: 16px;
+            font-weight: bold;
             color: var(--text);
-            opacity: 0.55;
-            text-align: left;
-            box-sizing: border-box;
-            z-index: 100;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding: 0 0 12px 0;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -261,6 +243,7 @@
 
     <!-- トップ画面 -->
     <div id="top-screen" class="screen active">
+        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
             <button class="btn" onclick="openConjugation()">📋 活用システム</button>
             <button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード</button>
@@ -273,12 +256,14 @@
 
     <!-- 活用表画面 -->
     <div id="table-screen" class="screen">
+        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div class="table-container" id="table-content">読み込み中...</div>
         <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← 戻る</button>
     </div>
 
     <!-- フラッシュカード画面 -->
     <div id="card-screen" class="screen">
+        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
         <div class="card-container">
             <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
@@ -297,6 +282,7 @@
 
     <!-- クイズ画面 -->
     <div id="quiz-screen" class="screen">
+        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div id="quiz-q-container"><div id="quiz-question"></div></div>
         <div id="quiz-feedback"></div>
         <div id="quiz-answer-reveal"></div>
@@ -311,6 +297,7 @@
 
     <!-- 動詞エクスプローラー画面 -->
     <div id="explorer-screen" class="screen">
+        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div class="explorer-wrapper">
             <div class="explorer-section-title">動詞プロパティ</div>
             <div id="explorer-pickers-container" class="explorer-upper-grid">
@@ -330,9 +317,6 @@
         <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る</button>
     </div>
 </div>
-
-<!-- クレジット（全画面左下固定） -->
-<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
 
 <script>
     const URLS = {
@@ -427,16 +411,15 @@
         const ROW_COUNT = 14; // 1〜14行（ヘッダー含む）
 
         let html = '<table>';
-        for (let i = 0; i < Math.min(ROW_COUNT, data.length); i++) {
+        // 1行目（ヘッダー行）をスキップし、2行目から最大ROW_COUNT行表示
+        const startRow = 1;
+        for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
             const row = data[i];
             html += '<tr>';
             for (let j = 0; j < COL_COUNT; j++) {
-                // 空欄はそのまま（&nbsp;で幅確保）、改行置換なし
                 const cell = row[j] !== undefined ? row[j] : '';
                 const display = cell === '' ? '&nbsp;' : cell.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                html += i === 0
-                    ? `<th>${display}</th>`
-                    : `<td>${display}</td>`;
+                html += `<td>${display}</td>`;
             }
             html += '</tr>';
         }
