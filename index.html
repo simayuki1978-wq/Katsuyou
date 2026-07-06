@@ -411,8 +411,7 @@
         const ROW_COUNT = 14; // 1〜14行（ヘッダー含む）
 
         let html = '<table>';
-        // 1行目（ヘッダー行）をスキップし、2行目から最大ROW_COUNT行表示
-        const startRow = 1;
+        const startRow = 0;
         for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
             const row = data[i];
             html += '<tr>';
