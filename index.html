@@ -57,30 +57,20 @@
             color: var(--text);
         }
 
-        /* ── 活用表 ── */
         .table-container {
             overflow-x: auto; overflow-y: auto;
             border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px;
             flex: 1;
             -webkit-overflow-scrolling: touch;
         }
-        table {
-            border-collapse: collapse;
-            /* 列数×最小幅で横スクロール可能にする（auto だと縮みすぎる） */
-            width: max-content;
-            min-width: 100%;
-        }
+        table { border-collapse: collapse; width: max-content; min-width: 100%; }
         th, td {
             border: 1px solid var(--border);
             padding: 6px 8px; text-align: center;
             background-color: var(--card-bg); color: var(--text);
-            font-size: 12px;
-            white-space: nowrap;
-            word-break: normal;
-            width: auto;
+            font-size: 12px; white-space: nowrap; word-break: normal; width: auto;
         }
 
-        /* ── フラッシュカード ── */
         .card-container { perspective: 1000px; height: 360px; margin: 12px 0; flex-shrink: 0; }
         .card {
             width: 100%; height: 100%; position: relative;
@@ -114,7 +104,6 @@
         .example-back  { font-size: clamp(16px, 5vw, 24px); justify-content: center; }
         .card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
 
-        /* ── クイズ ── */
         #quiz-q-container {
             min-height: 120px; margin-bottom: 6px;
             border: 2px solid var(--border); border-radius: 25px;
@@ -140,7 +129,6 @@
         }
         .error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
 
-        /* ── 動詞エクスプローラー ── */
         .explorer-wrapper { display: flex; flex-direction: column; flex: 1; }
         .explorer-section-title {
             font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
@@ -165,7 +153,6 @@
             background-repeat: no-repeat; background-position: right 12px center; background-size: 12px;
         }
         .explorer-select:focus { border-color: var(--primary); }
-
         .explorer-drum-wrapper {
             display: flex; align-items: stretch;
             background-color: var(--card-bg); border: 2px solid var(--border);
@@ -177,14 +164,8 @@
             content: ''; position: absolute; left: 0; right: 0; height: 72px;
             z-index: 3; pointer-events: none;
         }
-        .explorer-drum-wrapper::before {
-            top: 0;
-            background: linear-gradient(to bottom, var(--card-bg) 0%, transparent 100%);
-        }
-        .explorer-drum-wrapper::after {
-            bottom: 0;
-            background: linear-gradient(to top, var(--card-bg) 0%, transparent 100%);
-        }
+        .explorer-drum-wrapper::before { top: 0; background: linear-gradient(to bottom, var(--card-bg) 0%, transparent 100%); }
+        .explorer-drum-wrapper::after  { bottom: 0; background: linear-gradient(to top, var(--card-bg) 0%, transparent 100%); }
         .explorer-drum-highlight {
             position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
             height: 72px; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border);
@@ -207,30 +188,18 @@
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 18px; box-sizing: border-box; gap: 12px;
         }
-        .explorer-drum-label {
-            font-size: 11px; color: var(--text); opacity: 0.55; font-weight: 600; flex-shrink: 0;
-        }
-        .explorer-drum-value {
-            font-size: 22px; font-weight: 700; color: var(--text);
-            letter-spacing: 0.02em; text-align: right;
-        }
+        .explorer-drum-label { font-size: 11px; color: var(--text); opacity: 0.55; font-weight: 600; flex-shrink: 0; }
+        .explorer-drum-value { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: right; }
         .explorer-error {
             grid-column: 1 / -1; text-align: center; padding: 20px;
             color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
             border-radius: 12px; font-size: 13px; line-height: 1.6;
         }
-        .explorer-loading {
-            grid-column: 1 / -1; text-align: center; padding: 20px;
-            color: var(--text); opacity: 0.6; font-size: 14px;
-        }
+        .explorer-loading { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text); opacity: 0.6; font-size: 14px; }
 
-        /* ── クレジット（各画面の一番上・左・太字） ── */
         .credit-bar {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--text);
-            padding: 0 0 12px 0;
-            flex-shrink: 0;
+            font-size: 16px; font-weight: bold; color: var(--text);
+            padding: 0 0 12px 0; flex-shrink: 0;
         }
     </style>
 </head>
@@ -241,7 +210,6 @@
         <button class="mode-toggle" onclick="toggleDarkMode()">🌙 Dark / Light</button>
     </div>
 
-    <!-- トップ画面 -->
     <div id="top-screen" class="screen active">
         <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
@@ -254,14 +222,12 @@
         </div>
     </div>
 
-    <!-- 活用表画面 -->
     <div id="table-screen" class="screen">
         <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div class="table-container" id="table-content">読み込み中...</div>
         <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← 戻る</button>
     </div>
 
-    <!-- フラッシュカード画面 -->
     <div id="card-screen" class="screen">
         <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
@@ -280,7 +246,6 @@
         <button class="btn btn-sub" onclick="showScreen('top-screen')">← トップへ戻る</button>
     </div>
 
-    <!-- クイズ画面 -->
     <div id="quiz-screen" class="screen">
         <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div id="quiz-q-container"><div id="quiz-question"></div></div>
@@ -295,7 +260,6 @@
         </div>
     </div>
 
-    <!-- 動詞エクスプローラー画面 -->
     <div id="explorer-screen" class="screen">
         <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div class="explorer-wrapper">
@@ -303,7 +267,6 @@
             <div id="explorer-pickers-container" class="explorer-upper-grid">
                 <div class="explorer-loading">データを読み込み中...</div>
             </div>
-
             <div class="explorer-section-title">活用形</div>
             <div class="explorer-drum-wrapper">
                 <div class="explorer-drum-highlight"></div>
@@ -397,8 +360,6 @@
         html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     }
 
-    // ── 1. 活用システム ──
-    // A〜J列（10列）・1〜14行を固定で表示。空欄はそのまま、改行なし・横スクロール対応。
     async function openConjugation() {
         showScreen('table-screen');
         const data = await fetchData('system');
@@ -406,10 +367,8 @@
             document.getElementById('table-content').innerHTML = '<p class="error-msg">データの読み込みに失敗しました。</p>';
             return;
         }
-
-        const COL_COUNT = 10; // A〜J列
-        const ROW_COUNT = 14; // 1〜14行（ヘッダー含む）
-
+        const COL_COUNT = 10;
+        const ROW_COUNT = 20;  // 15〜20行目の追加表も表示
         let html = '<table>';
         const startRow = 0;
         for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
@@ -426,7 +385,6 @@
         document.getElementById('table-content').innerHTML = html;
     }
 
-    // ── フラッシュカード共通 ──
     async function openFlashcard(mode) {
         currentMode = mode;
         showScreen('card-screen');
@@ -451,12 +409,10 @@
         const row = data[currentIndex];
         document.getElementById('main-card').classList.remove('is-flipped');
         document.getElementById('card-progress').innerText = `${currentIndex} / ${data.length - 1}`;
-
         const frontEl = document.getElementById('card-front-content');
         const backEl  = document.getElementById('card-back-content');
         frontEl.className = 'card-face card-front';
         backEl.className  = 'card-face card-back';
-
         if (currentMode === 'verb') {
             frontEl.classList.add('verb-front');
             frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
@@ -488,7 +444,7 @@
         if (currentIndex > 1) { currentIndex--; renderCard(); }
     }
 
-    // ── 5. クイズ ──
+    // ── クイズ ──
     async function openQuiz() {
         showScreen('quiz-screen');
         await fetchData('verb');
@@ -504,7 +460,13 @@
         const pool = dataStore.verb.slice(1);
         currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
         const headers = dataStore.verb[0];
-        quizColIdx = Math.floor(Math.random() * (currentQuizItem.length - 4)) + 4;
+
+        // 出題範囲をA〜L列（インデックス0〜11）に限定。
+        // 問題として意味のある列はE列（index 4）以降なので、4〜11の範囲でランダム選択する。
+        const QUIZ_COL_MIN = 4;   // E列
+        const QUIZ_COL_MAX = 11;  // L列
+        quizColIdx = Math.floor(Math.random() * (QUIZ_COL_MAX - QUIZ_COL_MIN + 1)) + QUIZ_COL_MIN;
+
         const formName = headers[quizColIdx] || 'その';
         document.getElementById('quiz-question').innerHTML =
             `「${currentQuizItem[0]}（${currentQuizItem[1]}）」の<br><strong>${formName}</strong> のかたちは？`;
@@ -522,9 +484,9 @@
         if (!userAns) return;
         const feedback = document.getElementById('quiz-feedback');
         const reveal   = document.getElementById('quiz-answer-reveal');
-        const isCorrect = currentQuizItem.some((val, idx) => idx >= 4 && val.trim() === userAns);
+        // 正解判定もA〜L列（index 4〜11）の範囲に限定
+        const isCorrect = currentQuizItem.some((val, idx) => idx >= 4 && idx <= 11 && val.trim() === userAns);
         const submitBtn = document.querySelector('#quiz-screen .btn:not(.btn-sub)');
-
         if (isCorrect) {
             feedback.style.color = 'var(--primary)';
             feedback.innerText = '✅ 正解！';
@@ -542,7 +504,7 @@
         if (isCorrect) setTimeout(() => { submitBtn.innerText = '答え合わせ'; }, 1000);
     }
 
-    // ── 6. 動詞エクスプローラー ──
+    // ── 動詞エクスプローラー ──
     const EXPLORER_KEY_COLUMN_HINTS    = ["辞書形", "見出し語", "動詞"];
     const EXPLORER_GROUP_COLUMN_HINTS  = ["グループ", "活用グループ", "種類"];
     const EXPLORER_STEM_COLUMN_HINTS   = ["語幹"];
@@ -595,7 +557,6 @@
         explorerGroupColIdx = explorerColumns.findIndex(c => EXPLORER_GROUP_COLUMN_HINTS.some(h => c.includes(h)));
         explorerStemColIdx  = explorerColumns.findIndex(c => EXPLORER_STEM_COLUMN_HINTS.some(h => c.includes(h)));
         if (explorerKeyColIdx === -1) { console.warn('「辞書形」列が見つかりません。'); explorerKeyColIdx = 1; }
-
         explorerPropertyColIdxs = explorerColumns
             .map((c, idx) => ({ c, idx }))
             .filter(({ c, idx }) => {
@@ -604,7 +565,6 @@
                 return EXPLORER_PROPERTY_COLUMN_HINTS.some(h => c.includes(h));
             })
             .map(({ idx }) => idx);
-
         explorerConjugationColIdxs = explorerColumns
             .map((c, idx) => ({ c, idx }))
             .filter(({ c, idx }) =>
@@ -613,7 +573,6 @@
                 !explorerPropertyColIdxs.includes(idx)
             )
             .map(({ idx }) => idx);
-
         if (explorerConjugationColIdxs.length === 0) console.warn('活用形列が見つかりませんでした。');
     }
 
@@ -626,7 +585,6 @@
         }
         const headerRow = data[0];
         const dataRows  = data.slice(1);
-
         explorerPropertyColIdxs.forEach(colIdx => {
             const columnName = headerRow[colIdx];
             const groupDiv = document.createElement('div');
@@ -660,47 +618,37 @@
         const data = dataStore.explorer;
         if (rowIndex < 1 || rowIndex >= data.length) return;
         const row = data[rowIndex];
-
         document.querySelectorAll('#explorer-pickers-container .explorer-select').forEach(sel => {
             sel.value = rowIndex;
         });
-
         let stemValue = (explorerStemColIdx !== -1 && row[explorerStemColIdx]) ? row[explorerStemColIdx].trim() : '';
         if (stemValue === '') stemValue = explorerComputeFallbackStem(row);
         document.getElementById('explorer-stem-fixed').innerText = stemValue === '' ? '-' : stemValue;
-
         const scroller = document.getElementById('explorer-drum-scroller');
         if (explorerConjugationColIdxs.length === 0) {
             scroller.innerHTML = '<div class="explorer-error">⚠ 表示できる活用形列が見つかりませんでした。</div>';
             return;
         }
-
         scroller.innerHTML = '';
         const topPad = document.createElement('div');
         topPad.className = 'explorer-drum-padding';
         scroller.appendChild(topPad);
-
         explorerConjugationColIdxs.forEach(colIdx => {
             const columnName = explorerColumns[colIdx];
             const cellValue  = row[colIdx];
             const fullValue  = (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') ? cellValue.trim() : '';
-
             const itemDiv = document.createElement('div');
             itemDiv.className = 'explorer-drum-item';
-
             const labelEl = document.createElement('div');
             labelEl.className = 'explorer-drum-label';
             labelEl.innerText = columnName;
-
             const valueEl = document.createElement('div');
             valueEl.className = 'explorer-drum-value';
             valueEl.innerText = fullValue === '' ? '---' : fullValue;
-
             itemDiv.appendChild(labelEl);
             itemDiv.appendChild(valueEl);
             scroller.appendChild(itemDiv);
         });
-
         const botPad = document.createElement('div');
         botPad.className = 'explorer-drum-padding';
         scroller.appendChild(botPad);
