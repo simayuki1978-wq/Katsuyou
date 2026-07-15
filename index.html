@@ -98,8 +98,6 @@
             border: 1px solid var(--dark-green); text-align: left; width: 45%;
         }
         .back-table td { padding: 7px 10px; border: 1px solid var(--border); font-size: 16px; font-weight: bold; text-align: left; }
-        .adj-front { font-size: clamp(20px, 6vw, 28px); }
-        .adj-back  { font-size: clamp(16px, 5vw, 22px); justify-content: center; }
         .example-front { font-size: clamp(18px, 5.5vw, 26px); }
         .example-back  { font-size: clamp(16px, 5vw, 24px); justify-content: center; }
         .card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
@@ -215,7 +213,6 @@
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
             <button class="btn" onclick="openConjugation()">📋 活用システム</button>
             <button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード</button>
-            <button class="btn btn-blue" onclick="openFlashcard('adj')">📗 形容詞カード</button>
             <button class="btn" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">📝 例文カード</button>
             <button class="btn" style="background:#ffc800; border-color:#e5a500; color:#333;" onclick="openQuiz()">🎯 クイズ</button>
             <button class="btn" style="background:#ff9600; border-color:#e58200;" onclick="openExplorer()">🔍 動詞エクスプローラー</button>
@@ -223,13 +220,13 @@
     </div>
 
     <div id="table-screen" class="screen">
-        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+        <div class="credit-bar">出典「ニューシステムによる日本語」</div>
         <div class="table-container" id="table-content">読み込み中...</div>
         <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← 戻る</button>
     </div>
 
     <div id="card-screen" class="screen">
-        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+        <div class="credit-bar">出典「ニューシステムによる日本語」</div>
         <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
         <div class="card-container">
             <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
@@ -285,12 +282,11 @@
     const URLS = {
         system:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
         verb:    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
-        adj:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1428601861&single=true&output=csv",
         example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv",
         explorer: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=494377810&single=true&output=csv"
     };
 
-    let dataStore = { system: [], verb: [], adj: [], example: [], explorer: [] };
+    let dataStore = { system: [], verb: [], example: [], explorer: [] };
     let currentMode = '';
     let currentIndex = 0;
     let currentQuizItem = null;
@@ -423,11 +419,7 @@
                 tableHtml += `<tr><th>${headers[i]}</th><td>${row[i] || '―'}</td></tr>`;
             }
             backEl.innerHTML = tableHtml + '</table>';
-        } else if (currentMode === 'adj') {
-            frontEl.classList.add('adj-front');
-            backEl.classList.add('adj-back');
-            frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
-            backEl.innerHTML  = row.slice(4).filter(Boolean).join('<br>') || '（裏面データなし）';
+       
         } else if (currentMode === 'example') {
             frontEl.classList.add('example-front');
             backEl.classList.add('example-back');
@@ -508,7 +500,7 @@
     const EXPLORER_KEY_COLUMN_HINTS    = ["辞書形", "見出し語", "動詞"];
     const EXPLORER_GROUP_COLUMN_HINTS  = ["グループ", "活用グループ", "種類"];
     const EXPLORER_STEM_COLUMN_HINTS   = ["語幹"];
-    const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞", "ふりがな", "読み", "グループ", "活用グループ", "種類", "英語の意味", "意味"];
+    const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞", "ふりがな", "読み"];
     const EXPLORER_CONJUGATION_HINTS   = ["形", "活用"];
 
     let explorerColumns = [];
