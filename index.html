@@ -169,12 +169,7 @@
             height: 72px; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border);
             z-index: 2; pointer-events: none;
         }
-        .explorer-stem-fixed {
-            flex-shrink: 0; width: 110px; background-color: #2d6a2d; color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 17px; font-weight: 700; letter-spacing: 0.03em;
-            text-align: center; padding: 0 8px; z-index: 4; position: relative;
-        }
+
         .explorer-drum-scroller {
             flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
             -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;
@@ -267,7 +262,6 @@
             <div class="explorer-section-title">活用形</div>
             <div class="explorer-drum-wrapper">
                 <div class="explorer-drum-highlight"></div>
-                <div class="explorer-stem-fixed" id="explorer-stem-fixed">---</div>
                 <div class="explorer-drum-scroller" id="explorer-drum-scroller">
                     <div class="explorer-drum-padding"></div>
                     <div class="explorer-drum-padding"></div>
@@ -499,28 +493,15 @@
     // ── 動詞エクスプローラー ──
     const EXPLORER_KEY_COLUMN_HINTS    = ["辞書形", "見出し語", "動詞"];
     const EXPLORER_GROUP_COLUMN_HINTS  = ["グループ", "活用グループ", "種類"];
-    const EXPLORER_STEM_COLUMN_HINTS   = ["語幹"];
     const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞", "ふりがな", "読み"];
     const EXPLORER_CONJUGATION_HINTS   = ["形", "活用"];
 
     let explorerColumns = [];
     let explorerKeyColIdx = -1;
     let explorerGroupColIdx = -1;
-    let explorerStemColIdx = -1;
     let explorerPropertyColIdxs = [];
     let explorerConjugationColIdxs = [];
     let explorerInitialized = false;
-
-    function explorerComputeFallbackStem(row) {
-        const dictWord = explorerKeyColIdx !== -1 && row[explorerKeyColIdx] ? row[explorerKeyColIdx].trim() : '';
-        const groupNum = explorerGroupColIdx !== -1 && row[explorerGroupColIdx] ? parseInt(row[explorerGroupColIdx], 10) : 1;
-        if (!dictWord) return '';
-        if (groupNum === 3) {
-            if (dictWord === 'する' || dictWord === 'くる' || dictWord === '来る') return '';
-            if (dictWord.endsWith('する') || dictWord.endsWith('くる') || dictWord.endsWith('来る')) return dictWord.slice(0, -2);
-        }
-        return dictWord.length > 1 ? dictWord.slice(0, -1) : dictWord;
-    }
 
     async function openExplorer() {
         showScreen('explorer-screen');
@@ -547,7 +528,6 @@
         explorerColumns = headerRow;
         explorerKeyColIdx   = explorerColumns.findIndex(c => EXPLORER_KEY_COLUMN_HINTS.some(h => c.includes(h)));
         explorerGroupColIdx = explorerColumns.findIndex(c => EXPLORER_GROUP_COLUMN_HINTS.some(h => c.includes(h)));
-        explorerStemColIdx  = explorerColumns.findIndex(c => EXPLORER_STEM_COLUMN_HINTS.some(h => c.includes(h)));
         if (explorerKeyColIdx === -1) { console.warn('「辞書形」列が見つかりません。'); explorerKeyColIdx = 1; }
         explorerPropertyColIdxs = explorerColumns
             .map((c, idx) => ({ c, idx }))
@@ -561,7 +541,6 @@
             .map((c, idx) => ({ c, idx }))
             .filter(({ c, idx }) =>
                 EXPLORER_CONJUGATION_HINTS.some(h => c.includes(h)) &&
-                idx !== explorerStemColIdx &&
                 !explorerPropertyColIdxs.includes(idx)
             )
             .map(({ idx }) => idx);
@@ -613,9 +592,7 @@
         document.querySelectorAll('#explorer-pickers-container .explorer-select').forEach(sel => {
             sel.value = rowIndex;
         });
-        let stemValue = (explorerStemColIdx !== -1 && row[explorerStemColIdx]) ? row[explorerStemColIdx].trim() : '';
-        if (stemValue === '') stemValue = explorerComputeFallbackStem(row);
-        document.getElementById('explorer-stem-fixed').innerText = stemValue === '' ? '-' : stemValue;
+
         const scroller = document.getElementById('explorer-drum-scroller');
         if (explorerConjugationColIdxs.length === 0) {
             scroller.innerHTML = '<div class="explorer-error">⚠ 表示できる活用形列が見つかりませんでした。</div>';
