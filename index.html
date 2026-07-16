@@ -178,11 +178,13 @@
         .explorer-drum-padding { height: 72px; flex-shrink: 0; }
         .explorer-drum-item {
             height: 72px; scroll-snap-align: center;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 18px; box-sizing: border-box; gap: 12px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 0 16px; box-sizing: border-box; gap: 2px;
+            width: 100%;
         }
-        .explorer-drum-label { font-size: 11px; color: var(--text); opacity: 0.55; font-weight: 600; flex-shrink: 0; }
-        .explorer-drum-value { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: right; }
+        .explorer-drum-label { font-size: 10px; color: var(--text); opacity: 0.5; font-weight: 600; text-align: center; }
+        .explorer-drum-value { font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: center; }
         .explorer-error {
             grid-column: 1 / -1; text-align: center; padding: 20px;
             color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
@@ -537,11 +539,17 @@
                 return EXPLORER_PROPERTY_COLUMN_HINTS.some(h => c.includes(h));
             })
             .map(({ idx }) => idx);
+        // 活用形列：プロパティ列・ID列(0)以外で、かつ列名に「形」または「活用」を含む列のみ
+        // 語幹列はスプレッドシートから削除済みのため除外不要だが、
+        // 万一「語幹」という名前の列が残っていても除外されるよう非活用ヒストも定義
+        const NON_CONJUGATION_HINTS = ["語幹", "ID", "id"];
         explorerConjugationColIdxs = explorerColumns
             .map((c, idx) => ({ c, idx }))
             .filter(({ c, idx }) =>
+                idx !== 0 &&
+                !explorerPropertyColIdxs.includes(idx) &&
                 EXPLORER_CONJUGATION_HINTS.some(h => c.includes(h)) &&
-                !explorerPropertyColIdxs.includes(idx)
+                !NON_CONJUGATION_HINTS.some(h => c.includes(h))
             )
             .map(({ idx }) => idx);
         if (explorerConjugationColIdxs.length === 0) console.warn('活用形列が見つかりませんでした。');
