@@ -420,7 +420,11 @@
             frontEl.classList.add('example-front');
             backEl.classList.add('example-back');
             frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
-            backEl.innerHTML  = row[9] || '（裏面データなし）';
+            // カンマで分割して各文を改行表示
+            const exampleText = row[9] || '';
+            backEl.innerHTML = exampleText
+                ? exampleText.split(',').map(s => s.trim()).filter(Boolean).join('<br>')
+                : '（裏面データなし）';
         }
         localStorage.setItem(`pos_${currentMode}`, currentIndex);
     }
