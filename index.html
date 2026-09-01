@@ -476,8 +476,8 @@
         if (!userAns) return;
         const feedback = document.getElementById('quiz-feedback');
         const reveal   = document.getElementById('quiz-answer-reveal');
-        // 正解判定もA〜L列（index 4〜11）の範囲に限定
-        const isCorrect = currentQuizItem.some((val, idx) => idx >= 4 && idx <= 11 && val.trim() === userAns);
+        // 正解判定は出題された列（quizColIdx）の値とだけ比較する
+        const isCorrect = (currentQuizItem[quizColIdx] || '').trim() === userAns;
         const submitBtn = document.querySelector('#quiz-screen .btn:not(.btn-sub)');
         if (isCorrect) {
             feedback.style.color = 'var(--primary)';
