@@ -233,6 +233,9 @@
                 <div class="card-face card-back" id="card-back-content"></div>
             </div>
         </div>
+        <div style="text-align:center; margin:6px 0;">
+            <button class="btn btn-sub" onclick="shuffleCards()">🔀 シャッフル</button>
+        </div>
         <div class="nav-controls">
             <button class="btn btn-sub" onclick="prevCard()">← まえへ</button>
             <button class="btn btn-sub" onclick="nextCard()">つぎへ →</button>
@@ -285,6 +288,8 @@
     let dataStore = { system: [], verb: [], example: [], explorer: [] };
     let currentMode = '';
     let currentIndex = 0;
+    let cardOrder = [];      // フラッシュカードの出題順（行番号のリスト）
+    let cardOrderPos = 0;    // cardOrder内での現在位置
     let currentQuizItem = null;
     let quizColIdx = 4;
     let quizWaitingNext = false;
@@ -389,6 +394,10 @@
         }
         currentIndex = parseInt(localStorage.getItem(`pos_${mode}`)) || 1;
         if (currentIndex >= data.length) currentIndex = 1;
+        // 出題順を1,2,3...の通常順で初期化し、保存されていた位置に合わせる
+        cardOrder = Array.from({ length: data.length - 1 }, (_, i) => i + 1);
+        cardOrderPos = cardOrder.indexOf(currentIndex);
+        if (cardOrderPos < 0) cardOrderPos = 0;
         renderCard();
     }
 
@@ -400,7 +409,7 @@
         }
         const row = data[currentIndex];
         document.getElementById('main-card').classList.remove('is-flipped');
-        document.getElementById('card-progress').innerText = `${currentIndex} / ${data.length - 1}`;
+        document.getElementById('card-progress').innerText = `${cardOrderPos + 1} / ${data.length - 1}`;
         const frontEl = document.getElementById('card-front-content');
         const backEl  = document.getElementById('card-back-content');
         frontEl.className = 'card-face card-front';
@@ -430,10 +439,31 @@
     }
 
     function nextCard() {
-        if (currentIndex < dataStore[currentMode].length - 1) { currentIndex++; renderCard(); }
+        if (cardOrderPos < cardOrder.length - 1) {
+            cardOrderPos++;
+            currentIndex = cardOrder[cardOrderPos];
+            renderCard();
+        }
     }
     function prevCard() {
-        if (currentIndex > 1) { currentIndex--; renderCard(); }
+        if (cardOrderPos > 0) {
+            cardOrderPos--;
+            currentIndex = cardOrder[cardOrderPos];
+            renderCard();
+        }
+    }
+
+    // Fisher-Yatesアルゴリズムで出題順をシャッフルし、先頭から表示し直す
+    function shuffleCards() {
+        const data = dataStore[currentMode];
+        if (!data || data.length <= 2) return;
+        for (let i = cardOrder.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cardOrder[i], cardOrder[j]] = [cardOrder[j], cardOrder[i]];
+        }
+        cardOrderPos = 0;
+        currentIndex = cardOrder[cardOrderPos];
+        renderCard();
     }
 
     // ── クイズ ──
