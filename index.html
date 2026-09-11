@@ -453,10 +453,11 @@
         currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
         const headers = dataStore.verb[0];
 
-        // 出題範囲をA〜L列（インデックス0〜11）に限定。
-        // 問題として意味のある列はE列（index 4）以降なので、4〜11の範囲でランダム選択する。
+        // 出題範囲をE列以降〜実際の最終列に限定。
+        // 列の増減があってもheaders.lengthから動的に算出するため、
+        // スプレッドシート側で列を追加/削除してもここを直す必要はない。
         const QUIZ_COL_MIN = 4;   // E列
-        const QUIZ_COL_MAX = 11;  // L列
+        const QUIZ_COL_MAX = headers.length - 1;
         quizColIdx = Math.floor(Math.random() * (QUIZ_COL_MAX - QUIZ_COL_MIN + 1)) + QUIZ_COL_MIN;
 
         const formName = headers[quizColIdx] || 'その';
