@@ -191,6 +191,19 @@
             border-radius: 12px; font-size: 13px; line-height: 1.6;
         }
         .explorer-loading { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text); opacity: 0.6; font-size: 14px; }
+        .explorer-search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: stretch; }
+        .explorer-search-input {
+            flex: 1; min-width: 0; padding: 12px 14px; font-size: 16px;
+            background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px;
+            color: var(--text); outline: none;
+        }
+        .explorer-search-input:focus { border-color: var(--primary); }
+        .explorer-search-btn {
+            width: auto; flex-shrink: 0; margin-bottom: 0;
+            padding: 0 16px; font-size: 15px; white-space: nowrap;
+        }
+        .explorer-search-heading { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+        #explorer-search-result { margin-bottom: 20px; }
 
         .credit-bar {
             font-size: 16px; font-weight: bold; color: var(--text);
@@ -260,6 +273,15 @@
     <div id="explorer-screen" class="screen">
         <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
         <div class="explorer-wrapper">
+            <div class="explorer-section-title">動詞をさがす（どんな動詞でもOK）</div>
+            <div class="explorer-search-row">
+                <input type="text" id="explorer-search-input" class="explorer-search-input"
+                       placeholder="例：食べる、書く、来る、する" autocomplete="off"
+                       onkeydown="if(event.key==='Enter') explorerSearchVerb();">
+                <button class="btn explorer-search-btn" onclick="explorerSearchVerb()">検索</button>
+            </div>
+            <div id="explorer-search-result"></div>
+
             <div class="explorer-section-title">動詞プロパティ</div>
             <div id="explorer-pickers-container" class="explorer-upper-grid">
                 <div class="explorer-loading">データを読み込み中...</div>
@@ -277,6 +299,8 @@
     </div>
 </div>
 
+<!-- kuromoji.js: 無料・オープンソースの日本語形態素解析ライブラリ（動詞エクスプローラーの自由入力検索用） -->
+<script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js" defer></script>
 <script>
     const URLS = {
         system:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
@@ -527,7 +551,147 @@
         if (isCorrect) setTimeout(() => { submitBtn.innerText = '答え合わせ'; }, 1000);
     }
 
-    // ── 動詞エクスプローラー ──
+    // ── 動詞をさがす（自由入力・kuromoji.js使用） ──
+    // kuromoji.js: MIT/Apache-2.0ライセンスのオープンソース形態素解析器。
+    // CDN上の辞書データ（数MB、gzip）を初回検索時にのみ読み込む。API課金は発生しない。
+    const KUROMOJI_DIC_PATH = 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/';
+    let kuromojiTokenizerPromise = null;
+
+    function getKuromojiTokenizer() {
+        if (!kuromojiTokenizerPromise) {
+            kuromojiTokenizerPromise = new Promise((resolve, reject) => {
+                if (typeof kuromoji === 'undefined') {
+                    reject(new Error('kuromoji.js not loaded'));
+                    return;
+                }
+                kuromoji.builder({ dicPath: KUROMOJI_DIC_PATH }).build((err, tokenizer) => {
+                    if (err) reject(err); else resolve(tokenizer);
+                });
+            });
+        }
+        return kuromojiTokenizerPromise;
+    }
+
+    // 五段活用：辞書形の最後の一文字ごとの変化パターン（あ／い／え／お段、て形・た形の音便）
+    const GODAN_ROW_TABLE = {
+        'う': { a: 'わ', i: 'い', e: 'え', o: 'お', te: 'って', ta: 'った' },
+        'く': { a: 'か', i: 'き', e: 'け', o: 'こ', te: 'いて', ta: 'いた' },
+        'ぐ': { a: 'が', i: 'ぎ', e: 'げ', o: 'ご', te: 'いで', ta: 'いだ' },
+        'す': { a: 'さ', i: 'し', e: 'せ', o: 'そ', te: 'して', ta: 'した' },
+        'つ': { a: 'た', i: 'ち', e: 'て', o: 'と', te: 'って', ta: 'った' },
+        'ぬ': { a: 'な', i: 'に', e: 'ね', o: 'の', te: 'んで', ta: 'んだ' },
+        'ぶ': { a: 'ば', i: 'び', e: 'べ', o: 'ぼ', te: 'んで', ta: 'んだ' },
+        'む': { a: 'ま', i: 'み', e: 'め', o: 'も', te: 'んで', ta: 'んだ' },
+        'る': { a: 'ら', i: 'り', e: 'れ', o: 'ろ', te: 'って', ta: 'った' }
+    };
+
+    // kuromojiが判定した活用型（conjugated_type）をもとに6つの活用形を生成する
+    // 表示順：1.ない形 2.ます形 3.辞書形 4.ば形（条件形） 5.よう形（意向形） 6.て形
+    function conjugateVerb(basicForm, conjugatedType) {
+        const forms = {};
+        if (conjugatedType.startsWith('一段')) {
+            const stem = basicForm.slice(0, -1);
+            forms['ない形']         = stem + 'ない';
+            forms['ます形']         = stem + 'ます';
+            forms['辞書形']         = basicForm;
+            forms['ば形（条件形）'] = stem + 'れば';
+            forms['よう形（意向形）'] = stem + 'よう';
+            forms['て形']           = stem + 'て';
+            return forms;
+        }
+        if (conjugatedType.startsWith('カ変')) {
+            forms['ない形']         = '来ない（こない）';
+            forms['ます形']         = '来ます（きます）';
+            forms['辞書形']         = '来る';
+            forms['ば形（条件形）'] = '来れば（くれば）';
+            forms['よう形（意向形）'] = '来よう（こよう）';
+            forms['て形']           = '来て（きて）';
+            return forms;
+        }
+        if (conjugatedType.startsWith('サ変') && conjugatedType.includes('ズル')) {
+            const stem = basicForm.slice(0, -2);
+            forms['ない形']         = stem + 'じない';
+            forms['ます形']         = stem + 'じます';
+            forms['辞書形']         = basicForm;
+            forms['ば形（条件形）'] = stem + 'ずれば';
+            forms['よう形（意向形）'] = stem + 'じよう';
+            forms['て形']           = stem + 'じて';
+            return forms;
+        }
+        if (conjugatedType.startsWith('サ変')) {
+            const stem = basicForm.slice(0, -2);
+            forms['ない形']         = stem + 'しない';
+            forms['ます形']         = stem + 'します';
+            forms['辞書形']         = basicForm;
+            forms['ば形（条件形）'] = stem + 'すれば';
+            forms['よう形（意向形）'] = stem + 'しよう';
+            forms['て形']           = stem + 'して';
+            return forms;
+        }
+        if (conjugatedType.startsWith('五段')) {
+            const lastChar = basicForm.slice(-1);
+            const stem     = basicForm.slice(0, -1);
+            const row = GODAN_ROW_TABLE[lastChar];
+            if (!row) return null;
+            let teEnding = row.te;
+            // 「行く」は例外的に促音便（って）になる
+            if (lastChar === 'く' && conjugatedType.includes('促音便')) {
+                teEnding = 'って';
+            }
+            let masuStem = stem + row.i;
+            // なさる・くださる等の特殊五段はます形だけ「い」段になる
+            if (conjugatedType.includes('特殊')) {
+                masuStem = stem + 'い';
+            }
+            forms['ない形']         = stem + row.a + 'ない';
+            forms['ます形']         = masuStem + 'ます';
+            forms['辞書形']         = basicForm;
+            forms['ば形（条件形）'] = stem + row.e + 'ば';
+            forms['よう形（意向形）'] = stem + row.o + 'う';
+            forms['て形']           = stem + teEnding;
+            return forms;
+        }
+        return null;
+    }
+
+    async function explorerSearchVerb() {
+        const inputEl = document.getElementById('explorer-search-input');
+        const input = inputEl.value.trim();
+        const resultEl = document.getElementById('explorer-search-result');
+        if (!input) { resultEl.innerHTML = ''; return; }
+        resultEl.innerHTML = '<div class="explorer-loading">解析エンジンを準備中…（初回のみ数秒かかります）</div>';
+        try {
+            const tokenizer = await getKuromojiTokenizer();
+            const tokens = tokenizer.tokenize(input);
+            let verbIdx = -1;
+            for (let i = tokens.length - 1; i >= 0; i--) {
+                if (tokens[i].pos === '動詞') { verbIdx = i; break; }
+            }
+            if (verbIdx === -1) {
+                resultEl.innerHTML = '<div class="explorer-error">⚠ 動詞として認識できませんでした。辞書形（例：食べる、書く、来る、する）で入力してください。</div>';
+                return;
+            }
+            const verbToken = tokens[verbIdx];
+            const basicForm = (verbToken.basic_form && verbToken.basic_form !== '*') ? verbToken.basic_form : verbToken.surface_form;
+            const prefix = tokens.slice(0, verbIdx).map(t => t.surface_form).join('');
+            const forms = conjugateVerb(basicForm, verbToken.conjugated_type || '');
+            if (!forms) {
+                resultEl.innerHTML = `<div class="explorer-error">⚠ 「${prefix}${basicForm}」の活用型（${verbToken.conjugated_type || '不明'}）にはまだ対応していません。</div>`;
+                return;
+            }
+            let html = `<div class="explorer-search-heading">「${prefix}${basicForm}」の活用形</div><table class="back-table">`;
+            Object.keys(forms).forEach(label => {
+                html += `<tr><th>${label}</th><td>${prefix}${forms[label]}</td></tr>`;
+            });
+            html += '</table>';
+            resultEl.innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            resultEl.innerHTML = '<div class="explorer-error">⚠ 辞書データの読み込みに失敗しました。ネットワーク接続を確認してください。</div>';
+        }
+    }
+
+    // ── 動詞エクスプローラー（スプレッドシート内の動詞を選んで見る、従来機能） ──
     const EXPLORER_KEY_COLUMN_HINTS    = ["辞書形", "見出し語", "動詞"];
     const EXPLORER_GROUP_COLUMN_HINTS  = ["グループ", "活用グループ", "種類"];
     const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞", "ふりがな", "読み"];
