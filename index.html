@@ -132,65 +132,12 @@
             font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
             color: var(--text); opacity: 0.55; margin-bottom: 10px; text-transform: uppercase;
         }
-        .explorer-upper-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px; margin-bottom: 24px;
-        }
-        .explorer-picker-group { display: flex; flex-direction: column; }
-        .explorer-picker-label {
-            font-size: 10px; color: var(--text); opacity: 0.6;
-            margin-bottom: 4px; font-weight: 500;
-            text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
-        }
-        .explorer-select {
-            width: 100%; padding: 12px 14px; font-size: 14px; font-weight: 500;
-            background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px;
-            color: var(--text); outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat; background-position: right 12px center; background-size: 12px;
-        }
-        .explorer-select:focus { border-color: var(--primary); }
-        .explorer-drum-wrapper {
-            display: flex; align-items: stretch;
-            background-color: var(--card-bg); border: 2px solid var(--border);
-            border-radius: 16px; overflow: hidden; margin-bottom: 16px;
-            height: 216px; position: relative;
-        }
-        .explorer-drum-wrapper::before,
-        .explorer-drum-wrapper::after {
-            content: ''; position: absolute; left: 0; right: 0; height: 72px;
-            z-index: 3; pointer-events: none;
-        }
-        .explorer-drum-wrapper::before { top: 0; background: linear-gradient(to bottom, var(--card-bg) 0%, transparent 100%); }
-        .explorer-drum-wrapper::after  { bottom: 0; background: linear-gradient(to top, var(--card-bg) 0%, transparent 100%); }
-        .explorer-drum-highlight {
-            position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-            height: 72px; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border);
-            z-index: 2; pointer-events: none;
-        }
-
-        .explorer-drum-scroller {
-            flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
-            -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .explorer-drum-scroller::-webkit-scrollbar { display: none; }
-        .explorer-drum-padding { height: 72px; flex-shrink: 0; }
-        .explorer-drum-item {
-            height: 72px; scroll-snap-align: center;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 0 16px; box-sizing: border-box; gap: 2px;
-            width: 100%;
-        }
-        .explorer-drum-label { font-size: 10px; color: var(--text); opacity: 0.5; font-weight: 600; text-align: center; }
-        .explorer-drum-value { font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; text-align: center; }
         .explorer-error {
-            grid-column: 1 / -1; text-align: center; padding: 20px;
+            text-align: center; padding: 20px;
             color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
             border-radius: 12px; font-size: 13px; line-height: 1.6;
         }
-        .explorer-loading { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text); opacity: 0.6; font-size: 14px; }
+        .explorer-loading { text-align: center; padding: 20px; color: var(--text); opacity: 0.6; font-size: 14px; }
         .explorer-search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: stretch; }
         .explorer-search-input {
             flex: 1; min-width: 0; padding: 12px 14px; font-size: 16px;
@@ -281,19 +228,6 @@
                 <button class="btn explorer-search-btn" onclick="explorerSearchVerb()">検索</button>
             </div>
             <div id="explorer-search-result"></div>
-
-            <div class="explorer-section-title">動詞プロパティ</div>
-            <div id="explorer-pickers-container" class="explorer-upper-grid">
-                <div class="explorer-loading">データを読み込み中...</div>
-            </div>
-            <div class="explorer-section-title">活用形</div>
-            <div class="explorer-drum-wrapper">
-                <div class="explorer-drum-highlight"></div>
-                <div class="explorer-drum-scroller" id="explorer-drum-scroller">
-                    <div class="explorer-drum-padding"></div>
-                    <div class="explorer-drum-padding"></div>
-                </div>
-            </div>
         </div>
         <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る</button>
     </div>
@@ -305,11 +239,10 @@
     const URLS = {
         system:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
         verb:    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
-        example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv",
-        explorer: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=494377810&single=true&output=csv"
+        example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv"
     };
 
-    let dataStore = { system: [], verb: [], example: [], explorer: [] };
+    let dataStore = { system: [], verb: [], example: [] };
     let currentMode = '';
     let currentIndex = 0;
     let cardOrder = [];      // フラッシュカードの出題順（行番号のリスト）
@@ -691,145 +624,11 @@
         }
     }
 
-    // ── 動詞エクスプローラー（スプレッドシート内の動詞を選んで見る、従来機能） ──
-    const EXPLORER_KEY_COLUMN_HINTS    = ["辞書形", "見出し語", "動詞"];
-    const EXPLORER_GROUP_COLUMN_HINTS  = ["グループ", "活用グループ", "種類"];
-    const EXPLORER_PROPERTY_COLUMN_HINTS = ["辞書形", "見出し語", "動詞", "ふりがな", "読み"];
-    const EXPLORER_CONJUGATION_HINTS   = ["形", "活用"];
-
-    let explorerColumns = [];
-    let explorerKeyColIdx = -1;
-    let explorerGroupColIdx = -1;
-    let explorerPropertyColIdxs = [];
-    let explorerConjugationColIdxs = [];
-    let explorerInitialized = false;
-
-    async function openExplorer() {
+    // ── 動詞エクスプローラー（自由入力検索のみ。スプレッドシート版ピッカーは廃止） ──
+    function openExplorer() {
         showScreen('explorer-screen');
-        if (explorerInitialized) return;
-        const data = await fetchData('explorer');
-        if (data.length <= 1) {
-            explorerShowFatalError('動詞データの読み込みに失敗しました。ネットワーク接続を確認してください。');
-            return;
-        }
-        explorerResolveColumns(data[0]);
-        explorerInitPickers(data);
-        explorerUpdateData(1);
-        explorerInitialized = true;
-    }
-
-    function explorerShowFatalError(message) {
-        const container = document.getElementById('explorer-pickers-container');
-        if (container) container.innerHTML = `<div class="explorer-error">⚠ ${message}</div>`;
-        const scroller = document.getElementById('explorer-drum-scroller');
-        if (scroller) scroller.innerHTML = '';
-    }
-
-    function explorerResolveColumns(headerRow) {
-        explorerColumns = headerRow;
-        explorerKeyColIdx   = explorerColumns.findIndex(c => EXPLORER_KEY_COLUMN_HINTS.some(h => c.includes(h)));
-        explorerGroupColIdx = explorerColumns.findIndex(c => EXPLORER_GROUP_COLUMN_HINTS.some(h => c.includes(h)));
-        if (explorerKeyColIdx === -1) { console.warn('「辞書形」列が見つかりません。'); explorerKeyColIdx = 1; }
-        explorerPropertyColIdxs = explorerColumns
-            .map((c, idx) => ({ c, idx }))
-            .filter(({ c, idx }) => {
-                if (idx === 0) return false;
-                if (c.includes('辞書形')) return idx === explorerKeyColIdx;
-                return EXPLORER_PROPERTY_COLUMN_HINTS.some(h => c.includes(h));
-            })
-            .map(({ idx }) => idx);
-        // 活用形列：プロパティ列・ID列(0)以外で、かつ列名に「形」または「活用」を含む列のみ
-        // 語幹列はスプレッドシートから削除済みのため除外不要だが、
-        // 万一「語幹」という名前の列が残っていても除外されるよう非活用ヒストも定義
-        const NON_CONJUGATION_HINTS = ["語幹", "ID", "id"];
-        explorerConjugationColIdxs = explorerColumns
-            .map((c, idx) => ({ c, idx }))
-            .filter(({ c, idx }) =>
-                idx !== 0 &&
-                !explorerPropertyColIdxs.includes(idx) &&
-                EXPLORER_CONJUGATION_HINTS.some(h => c.includes(h)) &&
-                !NON_CONJUGATION_HINTS.some(h => c.includes(h))
-            )
-            .map(({ idx }) => idx);
-        if (explorerConjugationColIdxs.length === 0) console.warn('活用形列が見つかりませんでした。');
-    }
-
-    function explorerInitPickers(data) {
-        const container = document.getElementById('explorer-pickers-container');
-        container.innerHTML = '';
-        if (explorerPropertyColIdxs.length === 0) {
-            container.innerHTML = '<div class="explorer-error">⚠ 表示できる動詞プロパティ列が見つかりませんでした。</div>';
-            return;
-        }
-        const headerRow = data[0];
-        const dataRows  = data.slice(1);
-        explorerPropertyColIdxs.forEach(colIdx => {
-            const columnName = headerRow[colIdx];
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'explorer-picker-group';
-            const label = document.createElement('label');
-            label.className = 'explorer-picker-label';
-            label.innerText = columnName;
-            const select = document.createElement('select');
-            select.dataset.colIdx = colIdx;
-            select.className = 'explorer-select';
-            select.addEventListener('change', function(e) {
-                explorerUpdateData(parseInt(e.target.value, 10));
-            });
-            dataRows.forEach((row, i) => {
-                const rowIndex  = i + 1;
-                const cellValue = row[colIdx];
-                if (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') {
-                    const opt = document.createElement('option');
-                    opt.value     = rowIndex;
-                    opt.innerText = cellValue.trim();
-                    select.appendChild(opt);
-                }
-            });
-            groupDiv.appendChild(label);
-            groupDiv.appendChild(select);
-            container.appendChild(groupDiv);
-        });
-    }
-
-    function explorerUpdateData(rowIndex) {
-        const data = dataStore.explorer;
-        if (rowIndex < 1 || rowIndex >= data.length) return;
-        const row = data[rowIndex];
-        document.querySelectorAll('#explorer-pickers-container .explorer-select').forEach(sel => {
-            sel.value = rowIndex;
-        });
-
-        const scroller = document.getElementById('explorer-drum-scroller');
-        if (explorerConjugationColIdxs.length === 0) {
-            scroller.innerHTML = '<div class="explorer-error">⚠ 表示できる活用形列が見つかりませんでした。</div>';
-            return;
-        }
-        scroller.innerHTML = '';
-        const topPad = document.createElement('div');
-        topPad.className = 'explorer-drum-padding';
-        scroller.appendChild(topPad);
-        explorerConjugationColIdxs.forEach(colIdx => {
-            const columnName = explorerColumns[colIdx];
-            const cellValue  = row[colIdx];
-            const fullValue  = (cellValue !== undefined && cellValue !== null && cellValue.trim() !== '') ? cellValue.trim() : '';
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'explorer-drum-item';
-            const labelEl = document.createElement('div');
-            labelEl.className = 'explorer-drum-label';
-            labelEl.innerText = columnName;
-            const valueEl = document.createElement('div');
-            valueEl.className = 'explorer-drum-value';
-            valueEl.innerText = fullValue === '' ? '---' : fullValue;
-            itemDiv.appendChild(labelEl);
-            itemDiv.appendChild(valueEl);
-            scroller.appendChild(itemDiv);
-        });
-        const botPad = document.createElement('div');
-        botPad.className = 'explorer-drum-padding';
-        scroller.appendChild(botPad);
-        scroller.scrollTop = 0;
     }
 </script>
+
 </body>
 </html>
