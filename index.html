@@ -151,6 +151,11 @@
         }
         .explorer-search-heading { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
         #explorer-search-result { margin-bottom: 20px; }
+        .explorer-search-result-container {
+            max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            border: 1px solid var(--border); border-radius: 10px;
+        }
+        .explorer-search-result-container .back-table { margin: 0; }
 
         .credit-bar {
             font-size: 16px; font-weight: bold; color: var(--text);
@@ -233,8 +238,7 @@
     </div>
 </div>
 
-<!-- kuromoji.js: 無料・オープンソースの日本語形態素解析ライブラリ（動詞エクスプローラーの自由入力検索用） -->
-<script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js" defer></script>
+<!-- kuromoji.js（無料・オープンソースの日本語形態素解析ライブラリ）はWeb Worker内で読み込む -->
 <script>
     const URLS = {
         system:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
@@ -487,22 +491,61 @@
     // ── 動詞をさがす（自由入力・kuromoji.js使用） ──
     // kuromoji.js: MIT/Apache-2.0ライセンスのオープンソース形態素解析器。
     // CDN上の辞書データ（数MB、gzip）を初回検索時にのみ読み込む。API課金は発生しない。
-    const KUROMOJI_DIC_PATH = 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/';
-    let kuromojiTokenizerPromise = null;
+    // 辞書の読み込み・解析はCPU負荷が高くメインスレッドをブロックしうるため、
+    // Web Worker（別スレッド）内で実行し、画面が固まらないようにしている。
+    let kuromojiWorker = null;
+    let kuromojiRequestId = 0;
+    const kuromojiPendingRequests = {};
 
-    function getKuromojiTokenizer() {
-        if (!kuromojiTokenizerPromise) {
-            kuromojiTokenizerPromise = new Promise((resolve, reject) => {
-                if (typeof kuromoji === 'undefined') {
-                    reject(new Error('kuromoji.js not loaded'));
-                    return;
+    function getKuromojiWorker() {
+        if (!kuromojiWorker) {
+            const workerCode = `
+                importScripts('https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js');
+                let tokenizerPromise = null;
+                function getTokenizer() {
+                    if (!tokenizerPromise) {
+                        tokenizerPromise = new Promise((resolve, reject) => {
+                            kuromoji.builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' })
+                                .build((err, tokenizer) => { if (err) reject(err); else resolve(tokenizer); });
+                        });
+                    }
+                    return tokenizerPromise;
                 }
-                kuromoji.builder({ dicPath: KUROMOJI_DIC_PATH }).build((err, tokenizer) => {
-                    if (err) reject(err); else resolve(tokenizer);
-                });
-            });
+                self.onmessage = async function(e) {
+                    const { id, text } = e.data;
+                    try {
+                        const tokenizer = await getTokenizer();
+                        const tokens = tokenizer.tokenize(text);
+                        self.postMessage({ id, ok: true, tokens });
+                    } catch (err) {
+                        self.postMessage({ id, ok: false, error: String(err) });
+                    }
+                };
+            `;
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            kuromojiWorker = new Worker(URL.createObjectURL(blob));
+            kuromojiWorker.onmessage = (e) => {
+                const { id, ok, tokens, error } = e.data;
+                const pending = kuromojiPendingRequests[id];
+                if (!pending) return;
+                delete kuromojiPendingRequests[id];
+                if (ok) pending.resolve(tokens); else pending.reject(new Error(error));
+            };
+            kuromojiWorker.onerror = (err) => {
+                Object.values(kuromojiPendingRequests).forEach(p => p.reject(err));
+                for (const k in kuromojiPendingRequests) delete kuromojiPendingRequests[k];
+            };
         }
-        return kuromojiTokenizerPromise;
+        return kuromojiWorker;
+    }
+
+    function tokenizeInWorker(text) {
+        return new Promise((resolve, reject) => {
+            const worker = getKuromojiWorker();
+            const id = ++kuromojiRequestId;
+            kuromojiPendingRequests[id] = { resolve, reject };
+            worker.postMessage({ id, text });
+        });
     }
 
     // 五段活用：辞書形の最後の一文字ごとの変化パターン（あ／い／え／お段、て形・た形の音便）
@@ -518,9 +561,28 @@
         'る': { a: 'ら', i: 'り', e: 'れ', o: 'ろ', te: 'って', ta: 'った' }
     };
 
+    // kuromojiは文脈のない単独の動詞（特に基本語）の活用型を誤判定することがある。
+    // 実際に検証したところ「する」「いる」「くる」は単独では五段活用と誤認識された。
+    // 影響の大きい基本動詞のみ、判定結果を上書きする。
+    const VERB_TYPE_OVERRIDES = {
+        'する': 'サ変・スル',
+        'いる': '一段',
+        'くる': 'カ変・クル',
+        '来る': 'カ変・クル'
+    };
+    // 「ある」は五段活用だが、ない形だけ規則通りにならない特殊な動詞なので直接定義する
+    const VERB_FORM_OVERRIDES = {
+        'ある': {
+            'ない形': 'ない', 'ます形': 'あります', '辞書形': 'ある',
+            'ば形（条件形）': 'あれば', 'よう形（意向形）': 'あろう', 'て形': 'あって'
+        }
+    };
+
     // kuromojiが判定した活用型（conjugated_type）をもとに6つの活用形を生成する
     // 表示順：1.ない形 2.ます形 3.辞書形 4.ば形（条件形） 5.よう形（意向形） 6.て形
     function conjugateVerb(basicForm, conjugatedType) {
+        if (VERB_FORM_OVERRIDES[basicForm]) return VERB_FORM_OVERRIDES[basicForm];
+        conjugatedType = VERB_TYPE_OVERRIDES[basicForm] || conjugatedType;
         const forms = {};
         if (conjugatedType.startsWith('一段')) {
             const stem = basicForm.slice(0, -1);
@@ -594,8 +656,7 @@
         if (!input) { resultEl.innerHTML = ''; return; }
         resultEl.innerHTML = '<div class="explorer-loading">解析エンジンを準備中…（初回のみ数秒かかります）</div>';
         try {
-            const tokenizer = await getKuromojiTokenizer();
-            const tokens = tokenizer.tokenize(input);
+            const tokens = await tokenizeInWorker(input);
             let verbIdx = -1;
             for (let i = tokens.length - 1; i >= 0; i--) {
                 if (tokens[i].pos === '動詞') { verbIdx = i; break; }
@@ -612,11 +673,12 @@
                 resultEl.innerHTML = `<div class="explorer-error">⚠ 「${prefix}${basicForm}」の活用型（${verbToken.conjugated_type || '不明'}）にはまだ対応していません。</div>`;
                 return;
             }
-            let html = `<div class="explorer-search-heading">「${prefix}${basicForm}」の活用形</div><table class="back-table">`;
+            let html = `<div class="explorer-search-heading">「${prefix}${basicForm}」の活用形</div>`;
+            html += '<div class="explorer-search-result-container"><table class="back-table">';
             Object.keys(forms).forEach(label => {
                 html += `<tr><th>${label}</th><td>${prefix}${forms[label]}</td></tr>`;
             });
-            html += '</table>';
+            html += '</table></div>';
             resultEl.innerHTML = html;
         } catch (err) {
             console.error(err);
