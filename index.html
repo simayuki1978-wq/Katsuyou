@@ -384,7 +384,7 @@ function renderCard() {
 
     const headers = data[0];
     let tableHtml = '<table class="back-table">';
-    for (let i = 4; i <= 11 && i < headers.length; i++) {
+    for (let i = 4; i < headers.length; i++) {
       if (!headers[i]) continue;
       tableHtml += `<tr><th>${headers[i]}</th><td>${row[i] || '―'}</td></tr>`;
     }
@@ -583,13 +583,13 @@ const VERB_TYPE_OVERRIDES = {
 // 「ある」は五段活用だが、ない形だけ規則通りにならない特殊な動詞なので直接定義する
 const VERB_FORM_OVERRIDES = {
   'ある': {
-    'ない形': 'ない', 'ます形': 'あります', '辞書形': 'ある',
-    'ば形（条件形）': 'あれば', 'よう形（意向形）': 'あろう', 'て形': 'あって'
+    'ない-form': 'ない', 'ます-form': 'あります', 'Dictionary-form': 'ある',
+    'Conditional-form': 'あれば', 'Volitional-form': 'あろう', 'て-form': 'あって', 'た-form': 'あった'
   }
 };
 
-// kuromojiが判定した活用型（conjugated_type）をもとに6つの活用形を生成する
-// 表示順：1.ない形 2.ます形 3.辞書形 4.ば形（条件形） 5.よう形（意向形） 6.て形
+// kuromojiが判定した活用型（conjugated_type）をもとに7つの活用形を生成する
+// 表示順：1.ない-form 2.ます-form 3.Dictionary-form 4.Conditional-form 5.Volitional-form 6.て-form 7.た-form
 function conjugateVerb(basicForm, conjugatedType) {
   if (VERB_FORM_OVERRIDES[basicForm]) return VERB_FORM_OVERRIDES[basicForm];
   conjugatedType = VERB_TYPE_OVERRIDES[basicForm] || conjugatedType;
@@ -598,44 +598,48 @@ function conjugateVerb(basicForm, conjugatedType) {
 
   if (conjugatedType.startsWith('一段')) {
     const stem = basicForm.slice(0, -1);
-    forms['ない形'] = stem + 'ない';
-    forms['ます形'] = stem + 'ます';
-    forms['辞書形'] = basicForm;
-    forms['ば形（条件形）'] = stem + 'れば';
-    forms['よう形（意向形）'] = stem + 'よう';
-    forms['て形'] = stem + 'て';
+    forms['ない-form'] = stem + 'ない';
+    forms['ます-form'] = stem + 'ます';
+    forms['Dictionary-form'] = basicForm;
+    forms['Conditional-form'] = stem + 'れば';
+    forms['Volitional-form'] = stem + 'よう';
+    forms['て-form'] = stem + 'て';
+    forms['た-form'] = stem + 'た';
     return forms;
   }
 
   if (conjugatedType.startsWith('カ変')) {
-    forms['ない形'] = '来ない（こない）';
-    forms['ます形'] = '来ます（きます）';
-    forms['辞書形'] = '来る';
-    forms['ば形（条件形）'] = '来れば（くれば）';
-    forms['よう形（意向形）'] = '来よう（こよう）';
-    forms['て形'] = '来て（きて）';
+    forms['ない-form'] = '来ない（こない）';
+    forms['ます-form'] = '来ます（きます）';
+    forms['Dictionary-form'] = '来る';
+    forms['Conditional-form'] = '来れば（くれば）';
+    forms['Volitional-form'] = '来よう（こよう）';
+    forms['て-form'] = '来て（きて）';
+    forms['た-form'] = '来た（きた）';
     return forms;
   }
 
   if (conjugatedType.startsWith('サ変') && conjugatedType.includes('ズル')) {
     const stem = basicForm.slice(0, -2);
-    forms['ない形'] = stem + 'じない';
-    forms['ます形'] = stem + 'じます';
-    forms['辞書形'] = basicForm;
-    forms['ば形（条件形）'] = stem + 'ずれば';
-    forms['よう形（意向形）'] = stem + 'じよう';
-    forms['て形'] = stem + 'じて';
+    forms['ない-form'] = stem + 'じない';
+    forms['ます-form'] = stem + 'じます';
+    forms['Dictionary-form'] = basicForm;
+    forms['Conditional-form'] = stem + 'ずれば';
+    forms['Volitional-form'] = stem + 'じよう';
+    forms['て-form'] = stem + 'じて';
+    forms['た-form'] = stem + 'じた';
     return forms;
   }
 
   if (conjugatedType.startsWith('サ変')) {
     const stem = basicForm.slice(0, -2);
-    forms['ない形'] = stem + 'しない';
-    forms['ます形'] = stem + 'します';
-    forms['辞書形'] = basicForm;
-    forms['ば形（条件形）'] = stem + 'すれば';
-    forms['よう形（意向形）'] = stem + 'しよう';
-    forms['て形'] = stem + 'して';
+    forms['ない-form'] = stem + 'しない';
+    forms['ます-form'] = stem + 'します';
+    forms['Dictionary-form'] = basicForm;
+    forms['Conditional-form'] = stem + 'すれば';
+    forms['Volitional-form'] = stem + 'しよう';
+    forms['て-form'] = stem + 'して';
+    forms['た-form'] = stem + 'した';
     return forms;
   }
 
@@ -646,9 +650,11 @@ function conjugateVerb(basicForm, conjugatedType) {
     if (!row) return null;
 
     let teEnding = row.te;
-    // 「行く」は例外的に促音便（って）になる
+    let taEnding = row.ta;
+    // 「行く」は例外的に促音便（って／った）になる
     if (lastChar === 'く' && conjugatedType.includes('促音便')) {
       teEnding = 'って';
+      taEnding = 'った';
     }
 
     let masuStem = stem + row.i;
@@ -657,12 +663,13 @@ function conjugateVerb(basicForm, conjugatedType) {
       masuStem = stem + 'い';
     }
 
-    forms['ない形'] = stem + row.a + 'ない';
-    forms['ます形'] = masuStem + 'ます';
-    forms['辞書形'] = basicForm;
-    forms['ば形（条件形）'] = stem + row.e + 'ば';
-    forms['よう形（意向形）'] = stem + row.o + 'う';
-    forms['て形'] = stem + teEnding;
+    forms['ない-form'] = stem + row.a + 'ない';
+    forms['ます-form'] = masuStem + 'ます';
+    forms['Dictionary-form'] = basicForm;
+    forms['Conditional-form'] = stem + row.e + 'ば';
+    forms['Volitional-form'] = stem + row.o + 'う';
+    forms['て-form'] = stem + teEnding;
+    forms['た-form'] = stem + taEnding;
     return forms;
   }
 
