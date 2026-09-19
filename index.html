@@ -1,696 +1,719 @@
 <!DOCTYPE html>
 <html lang="ja" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日本語活用マスター</title>
-    <style>
-        :root {
-            --primary: #58cc02; --dark-green: #46a302; --bg: #ffffff; --text: #4b4b4b;
-            --card-bg: #ffffff; --border: #e5e5e5; --accent: #1cb0f6;
-        }
-        [data-theme="dark"] {
-            --primary: #58cc02; --dark-green: #46a302; --bg: #131f24; --text: #eeeeee;
-            --card-bg: #202f36; --border: #3c4d54; --accent: #1cb0f6;
-        }
-
-        body {
-            margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f0f0f0; color: var(--text);
-            display: flex; justify-content: center; align-items: flex-start;
-            min-height: 100vh; transition: background-color 0.3s, color 0.3s;
-        }
-
-        #app {
-            width: 100%; max-width: 500px; min-height: 100vh;
-            display: flex; flex-direction: column;
-            background-color: var(--bg); color: var(--text);
-            transition: background-color 0.3s, color 0.3s;
-            box-shadow: 0 0 30px rgba(0,0,0,0.12);
-            box-sizing: border-box;
-        }
-
-        .header {
-            padding: 15px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px solid var(--border);
-            background-color: var(--bg); color: var(--text);
-            flex-shrink: 0;
-        }
-        .header-title { font-weight: bold; font-size: 16px; color: var(--text); }
-
-        .screen {
-            display: none; flex-direction: column; flex: 1;
-            padding: 16px; box-sizing: border-box; overflow-y: auto;
-            background-color: var(--bg); color: var(--text);
-        }
-        .active { display: flex; }
-
-        .btn {
-            background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
-            padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
-            margin-bottom: 15px; text-align: center; display: block; width: 100%; box-sizing: border-box;
-        }
-        .btn:active { transform: translateY(2px); border-bottom-width: 2px; }
-        .btn-blue { background: var(--accent); border-bottom-color: #1899d6; }
-        .btn-sub {
-            background: var(--card-bg); border: 2px solid var(--border); border-bottom-width: 2px;
-            color: var(--text);
-        }
-
-        .table-container {
-            overflow-x: auto; overflow-y: auto;
-            border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px;
-            flex: 1;
-            -webkit-overflow-scrolling: touch;
-        }
-        table { border-collapse: collapse; width: max-content; min-width: 100%; }
-        th, td {
-            border: 1px solid var(--border);
-            padding: 6px 8px; text-align: center;
-            background-color: var(--card-bg); color: var(--text);
-            font-size: 12px; white-space: nowrap; word-break: normal; width: auto;
-        }
-
-        .card-container { perspective: 1000px; height: 360px; margin: 12px 0; flex-shrink: 0; }
-        .card {
-            width: 100%; height: 100%; position: relative;
-            transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer;
-        }
-        .card.is-flipped { transform: rotateY(180deg); }
-        .card-face {
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            border: 2px solid var(--border); border-radius: 25px;
-            background-color: var(--card-bg); color: var(--text);
-            padding: 20px; box-sizing: border-box;
-            box-shadow: 0 4px 0 var(--border);
-            text-align: center; overflow: hidden;
-        }
-        .verb-front { font-size: clamp(20px, 6vw, 28px); }
-        .card-back {
-            transform: rotateY(180deg); overflow-y: auto;
-            justify-content: flex-start; padding-top: 14px; font-size: 14px;
-        }
-        .back-table { width: 100%; border-collapse: collapse; }
-        .back-table th {
-            background-color: var(--primary); color: white;
-            padding: 7px 10px; font-size: 13px; white-space: nowrap;
-            border: 1px solid var(--dark-green); text-align: left; width: 45%;
-        }
-        .back-table td { padding: 7px 10px; border: 1px solid var(--border); font-size: 16px; font-weight: bold; text-align: left; }
-        .example-front { font-size: clamp(18px, 5.5vw, 26px); }
-        .example-back  { font-size: clamp(16px, 5vw, 24px); justify-content: center; }
-        .card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
-
-        #quiz-q-container {
-            min-height: 120px; margin-bottom: 6px;
-            border: 2px solid var(--border); border-radius: 25px;
-            background-color: var(--card-bg); color: var(--text);
-            display: flex; align-items: center; justify-content: center;
-            padding: 16px; box-sizing: border-box; text-align: center;
-            box-shadow: 0 4px 0 var(--border); font-size: 18px; flex-shrink: 0;
-        }
-        #quiz-feedback { font-weight: bold; font-size: 20px; margin: 4px 0; height: 26px; text-align: center; }
-        #quiz-answer-reveal { font-size: 15px; color: #ff4b4b; margin-bottom: 4px; min-height: 20px; text-align: center; font-weight: bold; }
-        .quiz-input {
-            width: 100%; padding: 12px; border-radius: 15px; border: 2px solid var(--border);
-            margin-bottom: 8px; font-size: 18px; box-sizing: border-box;
-            background-color: var(--card-bg); color: var(--text);
-        }
-        .quiz-input:focus { outline: none; border-color: var(--primary); }
-        .nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .mode-toggle {
-            font-size: 12px; cursor: pointer; padding: 5px 10px;
-            border: 1px solid var(--border); border-radius: 10px;
-            background-color: var(--card-bg); color: var(--text);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
-
-        .explorer-wrapper { display: flex; flex-direction: column; flex: 1; }
-        .explorer-section-title {
-            font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
-            color: var(--text); opacity: 0.55; margin-bottom: 10px; text-transform: uppercase;
-        }
-        .explorer-error {
-            text-align: center; padding: 20px;
-            color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
-            border-radius: 12px; font-size: 13px; line-height: 1.6;
-        }
-        .explorer-loading { text-align: center; padding: 20px; color: var(--text); opacity: 0.6; font-size: 14px; }
-        .explorer-search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: stretch; }
-        .explorer-search-input {
-            flex: 1; min-width: 0; padding: 12px 14px; font-size: 16px;
-            background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px;
-            color: var(--text); outline: none;
-        }
-        .explorer-search-input:focus { border-color: var(--primary); }
-        .explorer-search-btn {
-            width: auto; flex-shrink: 0; margin-bottom: 0;
-            padding: 0 16px; font-size: 15px; white-space: nowrap;
-        }
-        .explorer-search-heading { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
-        #explorer-search-result { margin-bottom: 20px; }
-        .explorer-search-result-container {
-            max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch;
-            border: 1px solid var(--border); border-radius: 10px;
-        }
-        .explorer-search-result-container .back-table { margin: 0; }
-
-        .credit-bar {
-            font-size: 16px; font-weight: bold; color: var(--text);
-            padding: 0 0 12px 0; flex-shrink: 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本語活用マスター</title>
+<style>
+:root {
+  --primary: #58cc02; --dark-green: #46a302; --bg: #ffffff; --text: #4b4b4b;
+  --card-bg: #ffffff; --border: #e5e5e5; --accent: #1cb0f6;
+}
+[data-theme="dark"] {
+  --primary: #58cc02; --dark-green: #46a302; --bg: #131f24; --text: #eeeeee;
+  --card-bg: #202f36; --border: #3c4d54; --accent: #1cb0f6;
+}
+body {
+  margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f0f0f0; color: var(--text);
+  display: flex; justify-content: center; align-items: flex-start;
+  min-height: 100vh; transition: background-color 0.3s, color 0.3s;
+}
+#app {
+  width: 100%; max-width: 500px; min-height: 100vh;
+  display: flex; flex-direction: column;
+  background-color: var(--bg); color: var(--text);
+  transition: background-color 0.3s, color 0.3s;
+  box-shadow: 0 0 30px rgba(0,0,0,0.12);
+  box-sizing: border-box;
+}
+.header {
+  padding: 15px; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 2px solid var(--border);
+  background-color: var(--bg); color: var(--text);
+  flex-shrink: 0;
+}
+.header-title { font-weight: bold; font-size: 16px; color: var(--text); }
+.screen {
+  display: none; flex-direction: column; flex: 1;
+  padding: 16px; box-sizing: border-box; overflow-y: auto;
+  background-color: var(--bg); color: var(--text);
+}
+.active { display: flex; }
+.btn {
+  background: var(--primary); color: white; border: none; border-bottom: 4px solid var(--dark-green);
+  padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
+  margin-bottom: 15px; text-align: center; display: block; width: 100%; box-sizing: border-box;
+}
+.btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+.btn-blue { background: var(--accent); border-bottom-color: #1899d6; }
+.btn-sub {
+  background: var(--card-bg); border: 2px solid var(--border); border-bottom-width: 2px;
+  color: var(--text);
+}
+.table-container {
+  overflow-x: auto; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 15px;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+table { border-collapse: collapse; width: max-content; min-width: 100%; }
+th, td {
+  border: 1px solid var(--border);
+  padding: 6px 8px; text-align: center;
+  background-color: var(--card-bg); color: var(--text);
+  font-size: 12px; white-space: nowrap; word-break: normal; width: auto;
+}
+.card-container { perspective: 1000px; height: 360px; margin: 12px 0; flex-shrink: 0; overflow: hidden; border-radius: 25px; }
+.card {
+  width: 100%; height: 100%; position: relative;
+  transition: transform 0.6s; -webkit-transition: -webkit-transform 0.6s;
+  transform-style: preserve-3d; -webkit-transform-style: preserve-3d;
+  cursor: pointer;
+}
+.card.is-flipped { transform: rotateY(180deg); -webkit-transform: rotateY(180deg); }
+.card-face {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  border: 2px solid var(--border); border-radius: 25px;
+  background-color: var(--card-bg); color: var(--text);
+  padding: 20px; box-sizing: border-box;
+  box-shadow: 0 4px 0 var(--border);
+  text-align: center; overflow: hidden;
+}
+.verb-front { font-size: clamp(20px, 6vw, 28px); }
+.card-back {
+  transform: rotateY(180deg); -webkit-transform: rotateY(180deg);
+  overflow-y: auto;
+  justify-content: flex-start; padding-top: 14px; font-size: 14px;
+}
+.back-table { width: 100%; border-collapse: collapse; }
+.back-table th {
+  background-color: var(--primary); color: white;
+  padding: 7px 10px; font-size: 13px; white-space: nowrap;
+  border: 1px solid var(--dark-green); text-align: left; width: 45%;
+}
+.back-table td { padding: 7px 10px; border: 1px solid var(--border); font-size: 16px; font-weight: bold; text-align: left; }
+.example-front { font-size: clamp(18px, 5.5vw, 26px); }
+.example-back { font-size: clamp(16px, 5vw, 24px); justify-content: center; }
+.card-hint { font-size: 12px; color: #aaa; margin-top: 10px; }
+#quiz-q-container {
+  min-height: 120px; margin-bottom: 6px;
+  border: 2px solid var(--border); border-radius: 25px;
+  background-color: var(--card-bg); color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; box-sizing: border-box; text-align: center;
+  box-shadow: 0 4px 0 var(--border); font-size: 18px; flex-shrink: 0;
+}
+#quiz-feedback { font-weight: bold; font-size: 20px; margin: 4px 0; height: 26px; text-align: center; }
+#quiz-answer-reveal { font-size: 15px; color: #ff4b4b; margin-bottom: 4px; min-height: 20px; text-align: center; font-weight: bold; }
+.quiz-input {
+  width: 100%; padding: 12px; border-radius: 15px; border: 2px solid var(--border);
+  margin-bottom: 8px; font-size: 18px; box-sizing: border-box;
+  background-color: var(--card-bg); color: var(--text);
+}
+.quiz-input:focus { outline: none; border-color: var(--primary); }
+.nav-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mode-toggle {
+  font-size: 12px; cursor: pointer; padding: 5px 10px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background-color: var(--card-bg); color: var(--text);
+  transition: background-color 0.3s, color 0.3s;
+}
+.error-msg { color: #ff4b4b; text-align: center; padding: 20px; }
+.explorer-wrapper { display: flex; flex-direction: column; flex: 1; }
+.explorer-section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--text); opacity: 0.55; margin-bottom: 10px; text-transform: uppercase;
+}
+.explorer-error {
+  text-align: center; padding: 20px;
+  color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca;
+  border-radius: 12px; font-size: 13px; line-height: 1.6;
+}
+.explorer-loading { text-align: center; padding: 20px; color: var(--text); opacity: 0.6; font-size: 14px; }
+.explorer-search-row { display: flex; gap: 8px; margin-bottom: 16px; align-items: stretch; }
+.explorer-search-input {
+  flex: 1; min-width: 0; padding: 12px 14px; font-size: 16px;
+  background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px;
+  color: var(--text); outline: none;
+}
+.explorer-search-input:focus { border-color: var(--primary); }
+.explorer-search-btn {
+  width: auto; flex-shrink: 0; margin-bottom: 0;
+  padding: 0 16px; font-size: 15px; white-space: nowrap;
+}
+.explorer-search-heading { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+#explorer-search-result { margin-bottom: 20px; }
+.explorer-search-result-container {
+  max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border); border-radius: 10px;
+}
+.explorer-search-result-container .back-table { margin: 0; }
+.credit-bar {
+  font-size: 16px; font-weight: bold; color: var(--text);
+  padding: 0 0 12px 0; flex-shrink: 0;
+}
+</style>
 </head>
 <body>
 <div id="app">
-    <div class="header">
-        <span class="header-title" id="screen-title">日本語活用マスター</span>
-        <button class="mode-toggle" onclick="toggleDarkMode()">🌙 Dark / Light</button>
-    </div>
+<div class="header">
+<span class="header-title" id="screen-title">日本語活用マスター</span>
+<button class="mode-toggle" onclick="toggleDarkMode()">🌙 Dark / Light</button>
+</div>
 
-    <div id="top-screen" class="screen active">
-        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
-        <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-            <button class="btn" onclick="openConjugation()">📋 活用システム</button>
-            <button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード</button>
-            <button class="btn" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">📝 例文カード</button>
-            <button class="btn" style="background:#ffc800; border-color:#e5a500; color:#333;" onclick="openQuiz()">🎯 クイズ</button>
-            <button class="btn" style="background:#ff9600; border-color:#e58200;" onclick="openExplorer()">🔍 動詞エクスプローラー</button>
-        </div>
-    </div>
+<div id="top-screen" class="screen active">
+<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+<div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+<button class="btn" onclick="openConjugation()">📋 活用システム</button>
+<button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード</button>
+<button class="btn" style="background:#a560e8; border-color:#8848c8" onclick="openFlashcard('example')">📝 例文カード</button>
+<button class="btn" style="background:#ffc800; border-color:#e5a500; color:#333;" onclick="openQuiz()">🎯 クイズ</button>
+<button class="btn" style="background:#ff9600; border-color:#e58200;" onclick="openExplorer()">🔍 動詞エクスプローラー</button>
+</div>
+</div>
 
-    <div id="table-screen" class="screen">
-        <div class="credit-bar">出典「ニューシステムによる日本語」</div>
-        <div class="table-container" id="table-content">読み込み中...</div>
-        <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← 戻る</button>
-    </div>
+<div id="table-screen" class="screen">
+<div class="credit-bar">出典「ニューシステムによる日本語」</div>
+<div class="table-container" id="table-content">読み込み中...</div>
+<button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← 戻る</button>
+</div>
 
-    <div id="card-screen" class="screen">
-        <div class="credit-bar">出典「ニューシステムによる日本語」</div>
-        <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
-        <div class="card-container">
-            <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
-                <div class="card-face card-front" id="card-front-content">
-                    <span class="card-hint">読み込み中...</span>
-                </div>
-                <div class="card-face card-back" id="card-back-content"></div>
-            </div>
-        </div>
-        <div style="text-align:center; margin:6px 0;">
-            <button class="btn btn-sub" onclick="shuffleCards()">🔀 シャッフル</button>
-        </div>
-        <div class="nav-controls">
-            <button class="btn btn-sub" onclick="prevCard()">← まえへ</button>
-            <button class="btn btn-sub" onclick="nextCard()">つぎへ →</button>
-        </div>
-        <button class="btn btn-sub" onclick="showScreen('top-screen')">← トップへ戻る</button>
-    </div>
+<div id="card-screen" class="screen">
+<div class="credit-bar">出典「ニューシステムによる日本語」</div>
+<div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
+<div class="card-container">
+<div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
+<div class="card-face card-front" id="card-front-content">
+<span class="card-hint">読み込み中...</span>
+</div>
+<div class="card-face card-back" id="card-back-content"></div>
+</div>
+</div>
+<div style="text-align:center; margin:6px 0;">
+<button class="btn btn-sub" onclick="shuffleCards()">🔀 シャッフル</button>
+</div>
+<div class="nav-controls">
+<button class="btn btn-sub" onclick="prevCard()">← まえへ</button>
+<button class="btn btn-sub" onclick="nextCard()">つぎへ →</button>
+</div>
+<button class="btn btn-sub" onclick="showScreen('top-screen')">← トップへ戻る</button>
+</div>
 
-    <div id="quiz-screen" class="screen">
-        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
-        <div id="quiz-q-container"><div id="quiz-question"></div></div>
-        <div id="quiz-feedback"></div>
-        <div id="quiz-answer-reveal"></div>
-        <input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力..."
-               onkeydown="if(event.key==='Enter') checkAnswer()">
-        <button class="btn" onclick="checkAnswer()">答え合わせ</button>
-        <div style="display:flex; gap:10px;">
-            <button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表</button>
-            <button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen')">← 戻る</button>
-        </div>
-    </div>
+<div id="quiz-screen" class="screen">
+<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+<div id="quiz-q-container"><div id="quiz-question"></div></div>
+<div id="quiz-feedback"></div>
+<div id="quiz-answer-reveal"></div>
+<input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力..."
+  onkeydown="if(event.key==='Enter') checkAnswer()">
+<button class="btn" onclick="checkAnswer()">答え合わせ</button>
+<div style="display:flex; gap:10px;">
+<button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表</button>
+<button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen')">← 戻る</button>
+</div>
+</div>
 
-    <div id="explorer-screen" class="screen">
-        <div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
-        <div class="explorer-wrapper">
-            <div class="explorer-section-title">動詞をさがす（どんな動詞でもOK）</div>
-            <div class="explorer-search-row">
-                <input type="text" id="explorer-search-input" class="explorer-search-input"
-                       placeholder="例：食べる、書く、来る、する" autocomplete="off"
-                       onkeydown="if(event.key==='Enter') explorerSearchVerb();">
-                <button class="btn explorer-search-btn" onclick="explorerSearchVerb()">検索</button>
-            </div>
-            <div id="explorer-search-result"></div>
-        </div>
-        <button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る</button>
-    </div>
+<div id="explorer-screen" class="screen">
+<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+<div class="explorer-wrapper">
+<div class="explorer-section-title">動詞をさがす（どんな動詞でもOK）</div>
+<div class="explorer-search-row">
+<input type="text" id="explorer-search-input" class="explorer-search-input"
+  placeholder="例：食べる、書く、来る、する" autocomplete="off"
+  onkeydown="if(event.key==='Enter') explorerSearchVerb();">
+<button class="btn explorer-search-btn" onclick="explorerSearchVerb()">検索</button>
+</div>
+<div id="explorer-search-result"></div>
+</div>
+<button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る</button>
+</div>
+
 </div>
 
 <!-- kuromoji.js（無料・オープンソースの日本語形態素解析ライブラリ）はWeb Worker内で読み込む -->
 <script>
-    const URLS = {
-        system:  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
-        verb:    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
-        example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv"
-    };
+const URLS = {
+  system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
+  verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=257174721&single=true&output=csv",
+  example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv"
+};
 
-    let dataStore = { system: [], verb: [], example: [] };
-    let currentMode = '';
-    let currentIndex = 0;
-    let cardOrder = [];      // フラッシュカードの出題順（行番号のリスト）
-    let cardOrderPos = 0;    // cardOrder内での現在位置
-    let currentQuizItem = null;
-    let quizColIdx = 4;
-    let quizWaitingNext = false;
+let dataStore = { system: [], verb: [], example: [] };
+let currentMode = '';
+let currentIndex = 0;
+let cardOrder = []; // フラッシュカードの出題順（行番号のリスト）
+let cardOrderPos = 0; // cardOrder内での現在位置
+let currentQuizItem = null;
+let quizColIdx = 4;
+let quizWaitingNext = false;
 
-    function parseCSV(text) {
-        const rows = [];
-        let row = [], cell = '', inQuotes = false;
-        for (let i = 0; i < text.length; i++) {
-            const ch = text[i], next = text[i + 1];
-            if (inQuotes) {
-                if (ch === '"' && next === '"') { cell += '"'; i++; }
-                else if (ch === '"') { inQuotes = false; }
-                else { cell += ch; }
-            } else {
-                if (ch === '"') { inQuotes = true; }
-                else if (ch === ',') { row.push(cell.trim()); cell = ''; }
-                else if (ch === '\n' || (ch === '\r' && next === '\n')) {
-                    if (ch === '\r') i++;
-                    row.push(cell.trim()); cell = '';
-                    if (row.some(c => c !== '')) rows.push(row);
-                    row = [];
-                } else if (ch === '\r') {
-                    row.push(cell.trim()); cell = '';
-                    if (row.some(c => c !== '')) rows.push(row);
-                    row = [];
-                } else { cell += ch; }
-            }
-        }
-        if (cell !== '' || row.length > 0) {
-            row.push(cell.trim());
-            if (row.some(c => c !== '')) rows.push(row);
-        }
-        return rows;
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cell = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i], next = text[i + 1];
+    if (inQuotes) {
+      if (ch === '"' && next === '"') { cell += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { cell += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { row.push(cell.trim()); cell = ''; }
+      else if (ch === '\n' || (ch === '\r' && next === '\n')) {
+        if (ch === '\r') i++;
+        row.push(cell.trim()); cell = '';
+        if (row.some(c => c !== '')) rows.push(row);
+        row = [];
+      } else if (ch === '\r') {
+        row.push(cell.trim()); cell = '';
+        if (row.some(c => c !== '')) rows.push(row);
+        row = [];
+      } else { cell += ch; }
     }
+  }
+  if (cell !== '' || row.length > 0) {
+    row.push(cell.trim());
+    if (row.some(c => c !== '')) rows.push(row);
+  }
+  return rows;
+}
 
-    async function fetchData(key) {
-        if (dataStore[key].length > 0) return dataStore[key];
+async function fetchData(key) {
+  if (dataStore[key].length > 0) return dataStore[key];
+  try {
+    const res = await fetch(URLS[key]);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    dataStore[key] = parseCSV(await res.text());
+    return dataStore[key];
+  } catch (e) {
+    console.error(`fetchData(${key}) failed:`, e);
+    return [];
+  }
+}
+
+const SCREEN_TITLES = {
+  'top-screen': '日本語活用マスター',
+  'table-screen': '📋 活用システム',
+  'card-screen': '📘 フラッシュカード',
+  'quiz-screen': '🎯 クイズ',
+  'explorer-screen': '🔍 動詞エクスプローラー'
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('screen-title').innerText = SCREEN_TITLES[id] || id;
+}
+
+function toggleDarkMode() {
+  const html = document.documentElement;
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+async function openConjugation() {
+  showScreen('table-screen');
+  const data = await fetchData('system');
+  if (data.length === 0) {
+    document.getElementById('table-content').innerHTML = '<p class="error-msg">データの読み込みに失敗しました。</p>';
+    return;
+  }
+  const COL_COUNT = 10;
+  const ROW_COUNT = 20; // 15〜20行目の追加表も表示
+  let html = '<table>';
+  const startRow = 0;
+  for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
+    const row = data[i];
+    html += '<tr>';
+    for (let j = 0; j < COL_COUNT; j++) {
+      const cell = row[j] !== undefined ? row[j] : '';
+      const display = cell === '' ? '&nbsp;' : cell.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html += `<td>${display}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+  document.getElementById('table-content').innerHTML = html;
+}
+
+async function openFlashcard(mode) {
+  currentMode = mode;
+  showScreen('card-screen');
+  document.getElementById('card-front-content').innerHTML = '読み込み中...';
+  document.getElementById('card-back-content').innerHTML = '';
+  const data = await fetchData(mode);
+  if (data.length <= 1) {
+    document.getElementById('card-front-content').innerHTML = '<span class="error-msg">データがありません</span>';
+    return;
+  }
+  currentIndex = parseInt(localStorage.getItem(`pos_${mode}`)) || 1;
+  if (currentIndex >= data.length) currentIndex = 1;
+  // 出題順を1,2,3...の通常順で初期化し、保存されていた位置に合わせる
+  cardOrder = Array.from({ length: data.length - 1 }, (_, i) => i + 1);
+  cardOrderPos = cardOrder.indexOf(currentIndex);
+  if (cardOrderPos < 0) cardOrderPos = 0;
+  renderCard();
+}
+
+function renderCard() {
+  const data = dataStore[currentMode];
+  if (!data || !data[currentIndex]) {
+    document.getElementById('card-front-content').innerHTML = '<span class="error-msg">カードが見つかりません</span>';
+    return;
+  }
+  const row = data[currentIndex];
+
+  document.getElementById('main-card').classList.remove('is-flipped');
+  document.getElementById('card-progress').innerText = `${cardOrderPos + 1} / ${data.length - 1}`;
+
+  const frontEl = document.getElementById('card-front-content');
+  const backEl = document.getElementById('card-back-content');
+  frontEl.className = 'card-face card-front';
+  backEl.className = 'card-face card-back';
+  backEl.scrollTop = 0;
+
+  if (currentMode === 'verb') {
+    frontEl.classList.add('verb-front');
+    frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
+
+    const headers = data[0];
+    let tableHtml = '<table class="back-table">';
+    for (let i = 4; i <= 11 && i < headers.length; i++) {
+      if (!headers[i]) continue;
+      tableHtml += `<tr><th>${headers[i]}</th><td>${row[i] || '―'}</td></tr>`;
+    }
+    backEl.innerHTML = tableHtml + '</table>';
+  } else if (currentMode === 'example') {
+    frontEl.classList.add('example-front');
+    backEl.classList.add('example-back');
+    frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
+    // カンマで分割して各文を改行表示
+    const exampleText = row[9] || '';
+    backEl.innerHTML = exampleText
+      ? exampleText.split(',').map(s => s.trim()).filter(Boolean).join('<br>')
+      : '（裏面データなし）';
+  }
+
+  localStorage.setItem(`pos_${currentMode}`, currentIndex);
+}
+
+function nextCard() {
+  if (cardOrderPos < cardOrder.length - 1) {
+    cardOrderPos++;
+    currentIndex = cardOrder[cardOrderPos];
+    renderCard();
+  }
+}
+
+function prevCard() {
+  if (cardOrderPos > 0) {
+    cardOrderPos--;
+    currentIndex = cardOrder[cardOrderPos];
+    renderCard();
+  }
+}
+
+// Fisher-Yatesアルゴリズムで出題順をシャッフルし、先頭から表示し直す
+function shuffleCards() {
+  const data = dataStore[currentMode];
+  if (!data || data.length <= 2) return;
+  for (let i = cardOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cardOrder[i], cardOrder[j]] = [cardOrder[j], cardOrder[i]];
+  }
+  cardOrderPos = 0;
+  currentIndex = cardOrder[cardOrderPos];
+  renderCard();
+}
+
+// ── クイズ ──
+async function openQuiz() {
+  showScreen('quiz-screen');
+  await fetchData('verb');
+  if (dataStore.verb.length <= 1) {
+    document.getElementById('quiz-question').innerHTML = '<span class="error-msg">データの読み込みに失敗しました。</span>';
+    return;
+  }
+  quizWaitingNext = false;
+  newQuiz();
+}
+
+function newQuiz() {
+  const pool = dataStore.verb.slice(1);
+  currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
+  const headers = dataStore.verb[0];
+
+  // 出題範囲をE列以降〜実際の最終列に限定。
+  // 列の増減があってもheaders.lengthから動的に算出するため、
+  // スプレッドシート側で列を追加/削除してもここを直す必要はない。
+  const QUIZ_COL_MIN = 4; // E列
+  const QUIZ_COL_MAX = headers.length - 1;
+  quizColIdx = Math.floor(Math.random() * (QUIZ_COL_MAX - QUIZ_COL_MIN + 1)) + QUIZ_COL_MIN;
+  const formName = headers[quizColIdx] || 'その';
+
+  document.getElementById('quiz-question').innerHTML =
+    `「${currentQuizItem[0]}（${currentQuizItem[1]}）」の<br><strong>${formName}</strong> のかたちは？`;
+  document.getElementById('quiz-answer').value = '';
+  document.getElementById('quiz-feedback').innerText = '';
+  document.getElementById('quiz-answer-reveal').innerText = '';
+  document.getElementById('quiz-answer').disabled = false;
+  document.getElementById('quiz-answer').focus();
+  quizWaitingNext = false;
+}
+
+function checkAnswer() {
+  if (quizWaitingNext) { newQuiz(); return; }
+
+  const userAns = document.getElementById('quiz-answer').value.trim();
+  if (!userAns) return;
+
+  const feedback = document.getElementById('quiz-feedback');
+  const reveal = document.getElementById('quiz-answer-reveal');
+
+  // 正解判定は出題された列（quizColIdx）の値とだけ比較する
+  const isCorrect = (currentQuizItem[quizColIdx] || '').trim() === userAns;
+  const submitBtn = document.querySelector('#quiz-screen .btn:not(.btn-sub)');
+
+  if (isCorrect) {
+    feedback.style.color = 'var(--primary)';
+    feedback.innerText = '✅ 正解！';
+    reveal.innerText = '';
+    document.getElementById('quiz-answer').disabled = true;
+    setTimeout(newQuiz, 1000);
+  } else {
+    feedback.style.color = '#ff4b4b';
+    feedback.innerText = '❌ ちがうよ！';
+    reveal.innerText = `正解：${currentQuizItem[quizColIdx]}`;
+    document.getElementById('quiz-answer').disabled = true;
+    quizWaitingNext = true;
+    submitBtn.innerText = '次の問題へ →';
+  }
+  if (isCorrect) setTimeout(() => { submitBtn.innerText = '答え合わせ'; }, 1000);
+}
+
+// ── 動詞をさがす（自由入力・kuromoji.js使用） ──
+// kuromoji.js: MIT/Apache-2.0ライセンスのオープンソース形態素解析器。
+// CDN上の辞書データ（数MB、gzip）を初回検索時にのみ読み込む。API課金は発生しない。
+// 辞書の読み込み・解析はCPU負荷が高くメインスレッドをブロックしうるため、
+// Web Worker（別スレッド）内で実行し、画面が固まらないようにしている。
+let kuromojiWorker = null;
+let kuromojiRequestId = 0;
+const kuromojiPendingRequests = {};
+
+function getKuromojiWorker() {
+  if (!kuromojiWorker) {
+    const workerCode = `
+      importScripts('https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js');
+      let tokenizerPromise = null;
+      function getTokenizer() {
+        if (!tokenizerPromise) {
+          tokenizerPromise = new Promise((resolve, reject) => {
+            kuromoji.builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' })
+              .build((err, tokenizer) => { if (err) reject(err); else resolve(tokenizer); });
+          });
+        }
+        return tokenizerPromise;
+      }
+      self.onmessage = async function(e) {
+        const { id, text } = e.data;
         try {
-            const res = await fetch(URLS[key]);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            dataStore[key] = parseCSV(await res.text());
-            return dataStore[key];
-        } catch (e) {
-            console.error(`fetchData(${key}) failed:`, e);
-            return [];
-        }
-    }
-
-    const SCREEN_TITLES = {
-        'top-screen':      '日本語活用マスター',
-        'table-screen':    '📋 活用システム',
-        'card-screen':     '📘 フラッシュカード',
-        'quiz-screen':     '🎯 クイズ',
-        'explorer-screen': '🔍 動詞エクスプローラー'
-    };
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('screen-title').innerText = SCREEN_TITLES[id] || id;
-    }
-
-    function toggleDarkMode() {
-        const html = document.documentElement;
-        html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    }
-
-    async function openConjugation() {
-        showScreen('table-screen');
-        const data = await fetchData('system');
-        if (data.length === 0) {
-            document.getElementById('table-content').innerHTML = '<p class="error-msg">データの読み込みに失敗しました。</p>';
-            return;
-        }
-        const COL_COUNT = 10;
-        const ROW_COUNT = 20;  // 15〜20行目の追加表も表示
-        let html = '<table>';
-        const startRow = 0;
-        for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
-            const row = data[i];
-            html += '<tr>';
-            for (let j = 0; j < COL_COUNT; j++) {
-                const cell = row[j] !== undefined ? row[j] : '';
-                const display = cell === '' ? '&nbsp;' : cell.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                html += `<td>${display}</td>`;
-            }
-            html += '</tr>';
-        }
-        html += '</table>';
-        document.getElementById('table-content').innerHTML = html;
-    }
-
-    async function openFlashcard(mode) {
-        currentMode = mode;
-        showScreen('card-screen');
-        document.getElementById('card-front-content').innerHTML = '読み込み中...';
-        document.getElementById('card-back-content').innerHTML = '';
-        const data = await fetchData(mode);
-        if (data.length <= 1) {
-            document.getElementById('card-front-content').innerHTML = '<span class="error-msg">データがありません</span>';
-            return;
-        }
-        currentIndex = parseInt(localStorage.getItem(`pos_${mode}`)) || 1;
-        if (currentIndex >= data.length) currentIndex = 1;
-        // 出題順を1,2,3...の通常順で初期化し、保存されていた位置に合わせる
-        cardOrder = Array.from({ length: data.length - 1 }, (_, i) => i + 1);
-        cardOrderPos = cardOrder.indexOf(currentIndex);
-        if (cardOrderPos < 0) cardOrderPos = 0;
-        renderCard();
-    }
-
-    function renderCard() {
-        const data = dataStore[currentMode];
-        if (!data || !data[currentIndex]) {
-            document.getElementById('card-front-content').innerHTML = '<span class="error-msg">カードが見つかりません</span>';
-            return;
-        }
-        const row = data[currentIndex];
-        document.getElementById('main-card').classList.remove('is-flipped');
-        document.getElementById('card-progress').innerText = `${cardOrderPos + 1} / ${data.length - 1}`;
-        const frontEl = document.getElementById('card-front-content');
-        const backEl  = document.getElementById('card-back-content');
-        frontEl.className = 'card-face card-front';
-        backEl.className  = 'card-face card-back';
-        if (currentMode === 'verb') {
-            frontEl.classList.add('verb-front');
-            frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
-            const headers = data[0];
-            let tableHtml = '<table class="back-table">';
-            for (let i = 4; i <= 11 && i < headers.length; i++) {
-                if (!headers[i]) continue;
-                tableHtml += `<tr><th>${headers[i]}</th><td>${row[i] || '―'}</td></tr>`;
-            }
-            backEl.innerHTML = tableHtml + '</table>';
-       
-        } else if (currentMode === 'example') {
-            frontEl.classList.add('example-front');
-            backEl.classList.add('example-back');
-            frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
-            // カンマで分割して各文を改行表示
-            const exampleText = row[9] || '';
-            backEl.innerHTML = exampleText
-                ? exampleText.split(',').map(s => s.trim()).filter(Boolean).join('<br>')
-                : '（裏面データなし）';
-        }
-        localStorage.setItem(`pos_${currentMode}`, currentIndex);
-    }
-
-    function nextCard() {
-        if (cardOrderPos < cardOrder.length - 1) {
-            cardOrderPos++;
-            currentIndex = cardOrder[cardOrderPos];
-            renderCard();
-        }
-    }
-    function prevCard() {
-        if (cardOrderPos > 0) {
-            cardOrderPos--;
-            currentIndex = cardOrder[cardOrderPos];
-            renderCard();
-        }
-    }
-
-    // Fisher-Yatesアルゴリズムで出題順をシャッフルし、先頭から表示し直す
-    function shuffleCards() {
-        const data = dataStore[currentMode];
-        if (!data || data.length <= 2) return;
-        for (let i = cardOrder.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [cardOrder[i], cardOrder[j]] = [cardOrder[j], cardOrder[i]];
-        }
-        cardOrderPos = 0;
-        currentIndex = cardOrder[cardOrderPos];
-        renderCard();
-    }
-
-    // ── クイズ ──
-    async function openQuiz() {
-        showScreen('quiz-screen');
-        await fetchData('verb');
-        if (dataStore.verb.length <= 1) {
-            document.getElementById('quiz-question').innerHTML = '<span class="error-msg">データの読み込みに失敗しました。</span>';
-            return;
-        }
-        quizWaitingNext = false;
-        newQuiz();
-    }
-
-    function newQuiz() {
-        const pool = dataStore.verb.slice(1);
-        currentQuizItem = pool[Math.floor(Math.random() * pool.length)];
-        const headers = dataStore.verb[0];
-
-        // 出題範囲をE列以降〜実際の最終列に限定。
-        // 列の増減があってもheaders.lengthから動的に算出するため、
-        // スプレッドシート側で列を追加/削除してもここを直す必要はない。
-        const QUIZ_COL_MIN = 4;   // E列
-        const QUIZ_COL_MAX = headers.length - 1;
-        quizColIdx = Math.floor(Math.random() * (QUIZ_COL_MAX - QUIZ_COL_MIN + 1)) + QUIZ_COL_MIN;
-
-        const formName = headers[quizColIdx] || 'その';
-        document.getElementById('quiz-question').innerHTML =
-            `「${currentQuizItem[0]}（${currentQuizItem[1]}）」の<br><strong>${formName}</strong> のかたちは？`;
-        document.getElementById('quiz-answer').value = '';
-        document.getElementById('quiz-feedback').innerText = '';
-        document.getElementById('quiz-answer-reveal').innerText = '';
-        document.getElementById('quiz-answer').disabled = false;
-        document.getElementById('quiz-answer').focus();
-        quizWaitingNext = false;
-    }
-
-    function checkAnswer() {
-        if (quizWaitingNext) { newQuiz(); return; }
-        const userAns = document.getElementById('quiz-answer').value.trim();
-        if (!userAns) return;
-        const feedback = document.getElementById('quiz-feedback');
-        const reveal   = document.getElementById('quiz-answer-reveal');
-        // 正解判定は出題された列（quizColIdx）の値とだけ比較する
-        const isCorrect = (currentQuizItem[quizColIdx] || '').trim() === userAns;
-        const submitBtn = document.querySelector('#quiz-screen .btn:not(.btn-sub)');
-        if (isCorrect) {
-            feedback.style.color = 'var(--primary)';
-            feedback.innerText = '✅ 正解！';
-            reveal.innerText = '';
-            document.getElementById('quiz-answer').disabled = true;
-            setTimeout(newQuiz, 1000);
-        } else {
-            feedback.style.color = '#ff4b4b';
-            feedback.innerText = '❌ ちがうよ！';
-            reveal.innerText = `正解：${currentQuizItem[quizColIdx]}`;
-            document.getElementById('quiz-answer').disabled = true;
-            quizWaitingNext = true;
-            submitBtn.innerText = '次の問題へ →';
-        }
-        if (isCorrect) setTimeout(() => { submitBtn.innerText = '答え合わせ'; }, 1000);
-    }
-
-    // ── 動詞をさがす（自由入力・kuromoji.js使用） ──
-    // kuromoji.js: MIT/Apache-2.0ライセンスのオープンソース形態素解析器。
-    // CDN上の辞書データ（数MB、gzip）を初回検索時にのみ読み込む。API課金は発生しない。
-    // 辞書の読み込み・解析はCPU負荷が高くメインスレッドをブロックしうるため、
-    // Web Worker（別スレッド）内で実行し、画面が固まらないようにしている。
-    let kuromojiWorker = null;
-    let kuromojiRequestId = 0;
-    const kuromojiPendingRequests = {};
-
-    function getKuromojiWorker() {
-        if (!kuromojiWorker) {
-            const workerCode = `
-                importScripts('https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js');
-                let tokenizerPromise = null;
-                function getTokenizer() {
-                    if (!tokenizerPromise) {
-                        tokenizerPromise = new Promise((resolve, reject) => {
-                            kuromoji.builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' })
-                                .build((err, tokenizer) => { if (err) reject(err); else resolve(tokenizer); });
-                        });
-                    }
-                    return tokenizerPromise;
-                }
-                self.onmessage = async function(e) {
-                    const { id, text } = e.data;
-                    try {
-                        const tokenizer = await getTokenizer();
-                        const tokens = tokenizer.tokenize(text);
-                        self.postMessage({ id, ok: true, tokens });
-                    } catch (err) {
-                        self.postMessage({ id, ok: false, error: String(err) });
-                    }
-                };
-            `;
-            const blob = new Blob([workerCode], { type: 'application/javascript' });
-            kuromojiWorker = new Worker(URL.createObjectURL(blob));
-            kuromojiWorker.onmessage = (e) => {
-                const { id, ok, tokens, error } = e.data;
-                const pending = kuromojiPendingRequests[id];
-                if (!pending) return;
-                delete kuromojiPendingRequests[id];
-                if (ok) pending.resolve(tokens); else pending.reject(new Error(error));
-            };
-            kuromojiWorker.onerror = (err) => {
-                Object.values(kuromojiPendingRequests).forEach(p => p.reject(err));
-                for (const k in kuromojiPendingRequests) delete kuromojiPendingRequests[k];
-            };
-        }
-        return kuromojiWorker;
-    }
-
-    function tokenizeInWorker(text) {
-        return new Promise((resolve, reject) => {
-            const worker = getKuromojiWorker();
-            const id = ++kuromojiRequestId;
-            kuromojiPendingRequests[id] = { resolve, reject };
-            worker.postMessage({ id, text });
-        });
-    }
-
-    // 五段活用：辞書形の最後の一文字ごとの変化パターン（あ／い／え／お段、て形・た形の音便）
-    const GODAN_ROW_TABLE = {
-        'う': { a: 'わ', i: 'い', e: 'え', o: 'お', te: 'って', ta: 'った' },
-        'く': { a: 'か', i: 'き', e: 'け', o: 'こ', te: 'いて', ta: 'いた' },
-        'ぐ': { a: 'が', i: 'ぎ', e: 'げ', o: 'ご', te: 'いで', ta: 'いだ' },
-        'す': { a: 'さ', i: 'し', e: 'せ', o: 'そ', te: 'して', ta: 'した' },
-        'つ': { a: 'た', i: 'ち', e: 'て', o: 'と', te: 'って', ta: 'った' },
-        'ぬ': { a: 'な', i: 'に', e: 'ね', o: 'の', te: 'んで', ta: 'んだ' },
-        'ぶ': { a: 'ば', i: 'び', e: 'べ', o: 'ぼ', te: 'んで', ta: 'んだ' },
-        'む': { a: 'ま', i: 'み', e: 'め', o: 'も', te: 'んで', ta: 'んだ' },
-        'る': { a: 'ら', i: 'り', e: 'れ', o: 'ろ', te: 'って', ta: 'った' }
-    };
-
-    // kuromojiは文脈のない単独の動詞（特に基本語）の活用型を誤判定することがある。
-    // 実際に検証したところ「する」「いる」「くる」は単独では五段活用と誤認識された。
-    // 影響の大きい基本動詞のみ、判定結果を上書きする。
-    const VERB_TYPE_OVERRIDES = {
-        'する': 'サ変・スル',
-        'いる': '一段',
-        'くる': 'カ変・クル',
-        '来る': 'カ変・クル'
-    };
-    // 「ある」は五段活用だが、ない形だけ規則通りにならない特殊な動詞なので直接定義する
-    const VERB_FORM_OVERRIDES = {
-        'ある': {
-            'ない形': 'ない', 'ます形': 'あります', '辞書形': 'ある',
-            'ば形（条件形）': 'あれば', 'よう形（意向形）': 'あろう', 'て形': 'あって'
-        }
-    };
-
-    // kuromojiが判定した活用型（conjugated_type）をもとに6つの活用形を生成する
-    // 表示順：1.ない形 2.ます形 3.辞書形 4.ば形（条件形） 5.よう形（意向形） 6.て形
-    function conjugateVerb(basicForm, conjugatedType) {
-        if (VERB_FORM_OVERRIDES[basicForm]) return VERB_FORM_OVERRIDES[basicForm];
-        conjugatedType = VERB_TYPE_OVERRIDES[basicForm] || conjugatedType;
-        const forms = {};
-        if (conjugatedType.startsWith('一段')) {
-            const stem = basicForm.slice(0, -1);
-            forms['ない形']         = stem + 'ない';
-            forms['ます形']         = stem + 'ます';
-            forms['辞書形']         = basicForm;
-            forms['ば形（条件形）'] = stem + 'れば';
-            forms['よう形（意向形）'] = stem + 'よう';
-            forms['て形']           = stem + 'て';
-            return forms;
-        }
-        if (conjugatedType.startsWith('カ変')) {
-            forms['ない形']         = '来ない（こない）';
-            forms['ます形']         = '来ます（きます）';
-            forms['辞書形']         = '来る';
-            forms['ば形（条件形）'] = '来れば（くれば）';
-            forms['よう形（意向形）'] = '来よう（こよう）';
-            forms['て形']           = '来て（きて）';
-            return forms;
-        }
-        if (conjugatedType.startsWith('サ変') && conjugatedType.includes('ズル')) {
-            const stem = basicForm.slice(0, -2);
-            forms['ない形']         = stem + 'じない';
-            forms['ます形']         = stem + 'じます';
-            forms['辞書形']         = basicForm;
-            forms['ば形（条件形）'] = stem + 'ずれば';
-            forms['よう形（意向形）'] = stem + 'じよう';
-            forms['て形']           = stem + 'じて';
-            return forms;
-        }
-        if (conjugatedType.startsWith('サ変')) {
-            const stem = basicForm.slice(0, -2);
-            forms['ない形']         = stem + 'しない';
-            forms['ます形']         = stem + 'します';
-            forms['辞書形']         = basicForm;
-            forms['ば形（条件形）'] = stem + 'すれば';
-            forms['よう形（意向形）'] = stem + 'しよう';
-            forms['て形']           = stem + 'して';
-            return forms;
-        }
-        if (conjugatedType.startsWith('五段')) {
-            const lastChar = basicForm.slice(-1);
-            const stem     = basicForm.slice(0, -1);
-            const row = GODAN_ROW_TABLE[lastChar];
-            if (!row) return null;
-            let teEnding = row.te;
-            // 「行く」は例外的に促音便（って）になる
-            if (lastChar === 'く' && conjugatedType.includes('促音便')) {
-                teEnding = 'って';
-            }
-            let masuStem = stem + row.i;
-            // なさる・くださる等の特殊五段はます形だけ「い」段になる
-            if (conjugatedType.includes('特殊')) {
-                masuStem = stem + 'い';
-            }
-            forms['ない形']         = stem + row.a + 'ない';
-            forms['ます形']         = masuStem + 'ます';
-            forms['辞書形']         = basicForm;
-            forms['ば形（条件形）'] = stem + row.e + 'ば';
-            forms['よう形（意向形）'] = stem + row.o + 'う';
-            forms['て形']           = stem + teEnding;
-            return forms;
-        }
-        return null;
-    }
-
-    async function explorerSearchVerb() {
-        const inputEl = document.getElementById('explorer-search-input');
-        const input = inputEl.value.trim();
-        const resultEl = document.getElementById('explorer-search-result');
-        if (!input) { resultEl.innerHTML = ''; return; }
-        resultEl.innerHTML = '<div class="explorer-loading">解析エンジンを準備中…（初回のみ数秒かかります）</div>';
-        try {
-            const tokens = await tokenizeInWorker(input);
-            let verbIdx = -1;
-            for (let i = tokens.length - 1; i >= 0; i--) {
-                if (tokens[i].pos === '動詞') { verbIdx = i; break; }
-            }
-            if (verbIdx === -1) {
-                resultEl.innerHTML = '<div class="explorer-error">⚠ 動詞として認識できませんでした。辞書形（例：食べる、書く、来る、する）で入力してください。</div>';
-                return;
-            }
-            const verbToken = tokens[verbIdx];
-            const basicForm = (verbToken.basic_form && verbToken.basic_form !== '*') ? verbToken.basic_form : verbToken.surface_form;
-            const prefix = tokens.slice(0, verbIdx).map(t => t.surface_form).join('');
-            const forms = conjugateVerb(basicForm, verbToken.conjugated_type || '');
-            if (!forms) {
-                resultEl.innerHTML = `<div class="explorer-error">⚠ 「${prefix}${basicForm}」の活用型（${verbToken.conjugated_type || '不明'}）にはまだ対応していません。</div>`;
-                return;
-            }
-            let html = `<div class="explorer-search-heading">「${prefix}${basicForm}」の活用形</div>`;
-            html += '<div class="explorer-search-result-container"><table class="back-table">';
-            Object.keys(forms).forEach(label => {
-                html += `<tr><th>${label}</th><td>${prefix}${forms[label]}</td></tr>`;
-            });
-            html += '</table></div>';
-            resultEl.innerHTML = html;
+          const tokenizer = await getTokenizer();
+          const tokens = tokenizer.tokenize(text);
+          self.postMessage({ id, ok: true, tokens });
         } catch (err) {
-            console.error(err);
-            resultEl.innerHTML = '<div class="explorer-error">⚠ 辞書データの読み込みに失敗しました。ネットワーク接続を確認してください。</div>';
+          self.postMessage({ id, ok: false, error: String(err) });
         }
+      };
+    `;
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    kuromojiWorker = new Worker(URL.createObjectURL(blob));
+    kuromojiWorker.onmessage = (e) => {
+      const { id, ok, tokens, error } = e.data;
+      const pending = kuromojiPendingRequests[id];
+      if (!pending) return;
+      delete kuromojiPendingRequests[id];
+      if (ok) pending.resolve(tokens); else pending.reject(new Error(error));
+    };
+    kuromojiWorker.onerror = (err) => {
+      Object.values(kuromojiPendingRequests).forEach(p => p.reject(err));
+      for (const k in kuromojiPendingRequests) delete kuromojiPendingRequests[k];
+    };
+  }
+  return kuromojiWorker;
+}
+
+function tokenizeInWorker(text) {
+  return new Promise((resolve, reject) => {
+    const worker = getKuromojiWorker();
+    const id = ++kuromojiRequestId;
+    kuromojiPendingRequests[id] = { resolve, reject };
+    worker.postMessage({ id, text });
+  });
+}
+
+// 五段活用：辞書形の最後の一文字ごとの変化パターン（あ／い／え／お段、て形・た形の音便）
+const GODAN_ROW_TABLE = {
+  'う': { a: 'わ', i: 'い', e: 'え', o: 'お', te: 'って', ta: 'った' },
+  'く': { a: 'か', i: 'き', e: 'け', o: 'こ', te: 'いて', ta: 'いた' },
+  'ぐ': { a: 'が', i: 'ぎ', e: 'げ', o: 'ご', te: 'いで', ta: 'いだ' },
+  'す': { a: 'さ', i: 'し', e: 'せ', o: 'そ', te: 'して', ta: 'した' },
+  'つ': { a: 'た', i: 'ち', e: 'て', o: 'と', te: 'って', ta: 'った' },
+  'ぬ': { a: 'な', i: 'に', e: 'ね', o: 'の', te: 'んで', ta: 'んだ' },
+  'ぶ': { a: 'ば', i: 'び', e: 'べ', o: 'ぼ', te: 'んで', ta: 'んだ' },
+  'む': { a: 'ま', i: 'み', e: 'め', o: 'も', te: 'んで', ta: 'んだ' },
+  'る': { a: 'ら', i: 'り', e: 'れ', o: 'ろ', te: 'って', ta: 'った' }
+};
+
+// kuromojiは文脈のない単独の動詞（特に基本語）の活用型を誤判定することがある。
+// 実際に検証したところ「する」「いる」「くる」は単独では五段活用と誤認識された。
+// 影響の大きい基本動詞のみ、判定結果を上書きする。
+const VERB_TYPE_OVERRIDES = {
+  'する': 'サ変・スル',
+  'いる': '一段',
+  'くる': 'カ変・クル',
+  '来る': 'カ変・クル'
+};
+
+// 「ある」は五段活用だが、ない形だけ規則通りにならない特殊な動詞なので直接定義する
+const VERB_FORM_OVERRIDES = {
+  'ある': {
+    'ない形': 'ない', 'ます形': 'あります', '辞書形': 'ある',
+    'ば形（条件形）': 'あれば', 'よう形（意向形）': 'あろう', 'て形': 'あって'
+  }
+};
+
+// kuromojiが判定した活用型（conjugated_type）をもとに6つの活用形を生成する
+// 表示順：1.ない形 2.ます形 3.辞書形 4.ば形（条件形） 5.よう形（意向形） 6.て形
+function conjugateVerb(basicForm, conjugatedType) {
+  if (VERB_FORM_OVERRIDES[basicForm]) return VERB_FORM_OVERRIDES[basicForm];
+  conjugatedType = VERB_TYPE_OVERRIDES[basicForm] || conjugatedType;
+
+  const forms = {};
+
+  if (conjugatedType.startsWith('一段')) {
+    const stem = basicForm.slice(0, -1);
+    forms['ない形'] = stem + 'ない';
+    forms['ます形'] = stem + 'ます';
+    forms['辞書形'] = basicForm;
+    forms['ば形（条件形）'] = stem + 'れば';
+    forms['よう形（意向形）'] = stem + 'よう';
+    forms['て形'] = stem + 'て';
+    return forms;
+  }
+
+  if (conjugatedType.startsWith('カ変')) {
+    forms['ない形'] = '来ない（こない）';
+    forms['ます形'] = '来ます（きます）';
+    forms['辞書形'] = '来る';
+    forms['ば形（条件形）'] = '来れば（くれば）';
+    forms['よう形（意向形）'] = '来よう（こよう）';
+    forms['て形'] = '来て（きて）';
+    return forms;
+  }
+
+  if (conjugatedType.startsWith('サ変') && conjugatedType.includes('ズル')) {
+    const stem = basicForm.slice(0, -2);
+    forms['ない形'] = stem + 'じない';
+    forms['ます形'] = stem + 'じます';
+    forms['辞書形'] = basicForm;
+    forms['ば形（条件形）'] = stem + 'ずれば';
+    forms['よう形（意向形）'] = stem + 'じよう';
+    forms['て形'] = stem + 'じて';
+    return forms;
+  }
+
+  if (conjugatedType.startsWith('サ変')) {
+    const stem = basicForm.slice(0, -2);
+    forms['ない形'] = stem + 'しない';
+    forms['ます形'] = stem + 'します';
+    forms['辞書形'] = basicForm;
+    forms['ば形（条件形）'] = stem + 'すれば';
+    forms['よう形（意向形）'] = stem + 'しよう';
+    forms['て形'] = stem + 'して';
+    return forms;
+  }
+
+  if (conjugatedType.startsWith('五段')) {
+    const lastChar = basicForm.slice(-1);
+    const stem = basicForm.slice(0, -1);
+    const row = GODAN_ROW_TABLE[lastChar];
+    if (!row) return null;
+
+    let teEnding = row.te;
+    // 「行く」は例外的に促音便（って）になる
+    if (lastChar === 'く' && conjugatedType.includes('促音便')) {
+      teEnding = 'って';
     }
 
-    // ── 動詞エクスプローラー（自由入力検索のみ。スプレッドシート版ピッカーは廃止） ──
-    function openExplorer() {
-        showScreen('explorer-screen');
+    let masuStem = stem + row.i;
+    // なさる・くださる等の特殊五段はます形だけ「い」段になる
+    if (conjugatedType.includes('特殊')) {
+      masuStem = stem + 'い';
     }
+
+    forms['ない形'] = stem + row.a + 'ない';
+    forms['ます形'] = masuStem + 'ます';
+    forms['辞書形'] = basicForm;
+    forms['ば形（条件形）'] = stem + row.e + 'ば';
+    forms['よう形（意向形）'] = stem + row.o + 'う';
+    forms['て形'] = stem + teEnding;
+    return forms;
+  }
+
+  return null;
+}
+
+async function explorerSearchVerb() {
+  const inputEl = document.getElementById('explorer-search-input');
+  const input = inputEl.value.trim();
+  const resultEl = document.getElementById('explorer-search-result');
+  if (!input) { resultEl.innerHTML = ''; return; }
+
+  resultEl.innerHTML = '<div class="explorer-loading">解析エンジンを準備中…（初回のみ数秒かかります）</div>';
+
+  try {
+    const tokens = await tokenizeInWorker(input);
+
+    let verbIdx = -1;
+    for (let i = tokens.length - 1; i >= 0; i--) {
+      if (tokens[i].pos === '動詞') { verbIdx = i; break; }
+    }
+
+    if (verbIdx === -1) {
+      resultEl.innerHTML = '<div class="explorer-error">⚠ 動詞として認識できませんでした。辞書形（例：食べる、書く、来る、する）で入力してください。</div>';
+      return;
+    }
+
+    const verbToken = tokens[verbIdx];
+    const basicForm = (verbToken.basic_form && verbToken.basic_form !== '*') ? verbToken.basic_form : verbToken.surface_form;
+    const prefix = tokens.slice(0, verbIdx).map(t => t.surface_form).join('');
+
+    const forms = conjugateVerb(basicForm, verbToken.conjugated_type || '');
+
+    if (!forms) {
+      resultEl.innerHTML = `<div class="explorer-error">⚠ 「${prefix}${basicForm}」の活用型（${verbToken.conjugated_type || '不明'}）にはまだ対応していません。</div>`;
+      return;
+    }
+
+    let html = `<div class="explorer-search-heading">「${prefix}${basicForm}」の活用形</div>`;
+    html += '<div class="explorer-search-result-container"><table class="back-table">';
+    Object.keys(forms).forEach(label => {
+      html += `<tr><th>${label}</th><td>${prefix}${forms[label]}</td></tr>`;
+    });
+    html += '</table></div>';
+    resultEl.innerHTML = html;
+  } catch (err) {
+    console.error(err);
+    resultEl.innerHTML = '<div class="explorer-error">⚠ 辞書データの読み込みに失敗しました。ネットワーク接続を確認してください。</div>';
+  }
+}
+
+// ── 動詞エクスプローラー（自由入力検索のみ。スプレッドシート版ピッカーは廃止） ──
+function openExplorer() {
+  showScreen('explorer-screen');
+}
 </script>
-
 </body>
 </html>
