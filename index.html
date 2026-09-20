@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日本語活用マスター</title>
+<title>日本語活用マスター | Japanese Conjugation Master</title>
 <style>
 :root {
   --primary: #58cc02; --dark-green: #46a302; --bg: #ffffff; --text: #4b4b4b;
@@ -54,6 +54,10 @@ body {
 .btn-sub-en {
   display: block; font-size: 12px; font-weight: normal;
   opacity: 0.85; margin-top: 3px; letter-spacing: 0.02em;
+}
+.en-note {
+  display: block; font-size: 12px; font-weight: normal;
+  opacity: 0.7; margin-top: 4px; letter-spacing: 0.02em;
 }
 .table-container {
   overflow-x: auto; overflow-y: auto;
@@ -164,12 +168,15 @@ th, td {
 <body>
 <div id="app">
 <div class="header">
+<div>
 <span class="header-title" id="screen-title">日本語活用マスター</span>
+<span class="en-note" id="screen-title-en" style="margin-top:1px;">Japanese Conjugation Master</span>
+</div>
 <button class="mode-toggle" onclick="toggleDarkMode()">🌙 Dark / Light</button>
 </div>
 
 <div id="top-screen" class="screen active">
-<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考<span class="en-note">Reference: “Japanese by the New System” Vol. 1 (Mineko Ebihara)</span></div>
 <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
 <button class="btn" onclick="openConjugation()">📋 活用システム<span class="btn-sub-en">Conjugation Chart</span></button>
 <button class="btn btn-blue" onclick="openFlashcard('verb')">📘 動詞カード<span class="btn-sub-en">Verb Cards</span></button>
@@ -180,59 +187,59 @@ th, td {
 </div>
 
 <div id="table-screen" class="screen">
-<div class="credit-bar">出典「ニューシステムによる日本語」</div>
-<div class="table-container" id="table-content">読み込み中...</div>
-<button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← 戻る</button>
+<div class="credit-bar">出典「ニューシステムによる日本語」<span class="en-note">Source: “Japanese by the New System”</span></div>
+<div class="table-container" id="table-content">読み込み中... / Loading...</div>
+<button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← 戻る / Back</button>
 </div>
 
 <div id="card-screen" class="screen">
-<div class="credit-bar">出典「ニューシステムによる日本語」</div>
+<div class="credit-bar">出典「ニューシステムによる日本語」<span class="en-note">Source: “Japanese by the New System”</span></div>
 <div style="text-align:center; font-size:13px; color:#aaa;" id="card-progress"></div>
 <div class="card-container">
 <div id="main-card" class="card" onclick="this.classList.toggle('is-flipped')">
 <div class="card-face card-front" id="card-front-content">
-<span class="card-hint">読み込み中...</span>
+<span class="card-hint">読み込み中... / Loading...</span>
 </div>
 <div class="card-face card-back" id="card-back-content"></div>
 </div>
 </div>
 <div style="text-align:center; margin:6px 0;">
-<button class="btn btn-sub" onclick="shuffleCards()">🔀 シャッフル</button>
+<button class="btn btn-sub" onclick="shuffleCards()">🔀 シャッフル / Shuffle</button>
 </div>
 <div class="nav-controls">
-<button class="btn btn-sub" onclick="prevCard()">← まえへ</button>
-<button class="btn btn-sub" onclick="nextCard()">つぎへ →</button>
+<button class="btn btn-sub" onclick="prevCard()">← まえへ / Previous</button>
+<button class="btn btn-sub" onclick="nextCard()">つぎへ → / Next</button>
 </div>
-<button class="btn btn-sub" onclick="showScreen('top-screen')">← トップへ戻る</button>
+<button class="btn btn-sub" onclick="showScreen('top-screen')">← トップへ戻る / Home</button>
 </div>
 
 <div id="quiz-screen" class="screen">
-<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考<span class="en-note">Reference: “Japanese by the New System” Vol. 1 (Mineko Ebihara)</span></div>
 <div id="quiz-q-container"><div id="quiz-question"></div></div>
 <div id="quiz-feedback"></div>
 <div id="quiz-answer-reveal"></div>
-<input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力..."
+<input type="text" id="quiz-answer" class="quiz-input" placeholder="答えを入力... / Type your answer..."
   onkeydown="if(event.key==='Enter') checkAnswer()">
-<button class="btn" onclick="checkAnswer()">答え合わせ</button>
+<button class="btn" onclick="checkAnswer()">答え合わせ / Check Answer</button>
 <div style="display:flex; gap:10px;">
-<button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表</button>
-<button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen')">← 戻る</button>
+<button class="btn btn-sub" style="flex:1" onclick="openConjugation()">📋 活用表 / Conjugation Chart</button>
+<button class="btn btn-sub" style="flex:1" onclick="showScreen('top-screen')">← 戻る / Back</button>
 </div>
 </div>
 
 <div id="explorer-screen" class="screen">
-<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考</div>
+<div class="credit-bar">「ニューシステムによる日本語」上巻（海老原峰子氏）参考<span class="en-note">Reference: “Japanese by the New System” Vol. 1 (Mineko Ebihara)</span></div>
 <div class="explorer-wrapper">
-<div class="explorer-section-title">動詞をさがす（どんな動詞でもOK）</div>
+<div class="explorer-section-title">動詞をさがす（どんな動詞でもOK） / Search any verb</div>
 <div class="explorer-search-row">
 <input type="text" id="explorer-search-input" class="explorer-search-input"
-  placeholder="例：食べる、書く、来る、する" autocomplete="off"
+  placeholder="例：食べる、書く、来る、する (e.g. taberu, kaku, kuru, suru)" autocomplete="off"
   onkeydown="if(event.key==='Enter') explorerSearchVerb();">
-<button class="btn explorer-search-btn" onclick="explorerSearchVerb()">検索</button>
+<button class="btn explorer-search-btn" onclick="explorerSearchVerb()">検索 / Search</button>
 </div>
 <div id="explorer-search-result"></div>
 </div>
-<button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る</button>
+<button class="btn btn-sub" style="flex-shrink:0" onclick="showScreen('top-screen')">← トップへ戻る / Home</button>
 </div>
 
 </div>
@@ -299,17 +306,19 @@ async function fetchData(key) {
 }
 
 const SCREEN_TITLES = {
-  'top-screen': '日本語活用マスター',
-  'table-screen': '📋 活用システム',
-  'card-screen': '📘 フラッシュカード',
-  'quiz-screen': '🎯 クイズ',
-  'explorer-screen': '🔍 動詞エクスプローラー'
+  'top-screen': { ja: '日本語活用マスター', en: 'Japanese Conjugation Master' },
+  'table-screen': { ja: '📋 活用システム', en: 'Conjugation Chart' },
+  'card-screen': { ja: '📘 フラッシュカード', en: 'Flashcards' },
+  'quiz-screen': { ja: '🎯 クイズ', en: 'Quiz' },
+  'explorer-screen': { ja: '🔍 動詞エクスプローラー', en: 'Verb Explorer' }
 };
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.getElementById('screen-title').innerText = SCREEN_TITLES[id] || id;
+  const titles = SCREEN_TITLES[id] || { ja: id, en: '' };
+  document.getElementById('screen-title').innerText = titles.ja;
+  document.getElementById('screen-title-en').innerText = titles.en;
 }
 
 function toggleDarkMode() {
@@ -321,7 +330,7 @@ async function openConjugation() {
   showScreen('table-screen');
   const data = await fetchData('system');
   if (data.length === 0) {
-    document.getElementById('table-content').innerHTML = '<p class="error-msg">データの読み込みに失敗しました。</p>';
+    document.getElementById('table-content').innerHTML = '<p class="error-msg">データの読み込みに失敗しました。 / Failed to load data.</p>';
     return;
   }
   const COL_COUNT = 10;
@@ -345,11 +354,11 @@ async function openConjugation() {
 async function openFlashcard(mode) {
   currentMode = mode;
   showScreen('card-screen');
-  document.getElementById('card-front-content').innerHTML = '読み込み中...';
+  document.getElementById('card-front-content').innerHTML = '読み込み中... / Loading...';
   document.getElementById('card-back-content').innerHTML = '';
   const data = await fetchData(mode);
   if (data.length <= 1) {
-    document.getElementById('card-front-content').innerHTML = '<span class="error-msg">データがありません</span>';
+    document.getElementById('card-front-content').innerHTML = '<span class="error-msg">データがありません / No data available</span>';
     return;
   }
   currentIndex = parseInt(localStorage.getItem(`pos_${mode}`)) || 1;
@@ -364,7 +373,7 @@ async function openFlashcard(mode) {
 function renderCard() {
   const data = dataStore[currentMode];
   if (!data || !data[currentIndex]) {
-    document.getElementById('card-front-content').innerHTML = '<span class="error-msg">カードが見つかりません</span>';
+    document.getElementById('card-front-content').innerHTML = '<span class="error-msg">カードが見つかりません / Card not found</span>';
     return;
   }
   const row = data[currentIndex];
@@ -380,7 +389,7 @@ function renderCard() {
 
   if (currentMode === 'verb') {
     frontEl.classList.add('verb-front');
-    frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
+    frontEl.innerHTML = row.slice(0, 4).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認 / Tap to reveal answer</span>';
 
     const headers = data[0];
     let tableHtml = '<table class="back-table">';
@@ -392,12 +401,12 @@ function renderCard() {
   } else if (currentMode === 'example') {
     frontEl.classList.add('example-front');
     backEl.classList.add('example-back');
-    frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認</span>';
+    frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認 / Tap to reveal answer</span>';
     // カンマで分割して各文を改行表示
     const exampleText = row[9] || '';
     backEl.innerHTML = exampleText
       ? exampleText.split(',').map(s => s.trim()).filter(Boolean).join('<br>')
-      : '（裏面データなし）';
+      : '（裏面データなし） / (No back-side data)';
   }
 
   localStorage.setItem(`pos_${currentMode}`, currentIndex);
@@ -437,7 +446,7 @@ async function openQuiz() {
   showScreen('quiz-screen');
   await fetchData('verb');
   if (dataStore.verb.length <= 1) {
-    document.getElementById('quiz-question').innerHTML = '<span class="error-msg">データの読み込みに失敗しました。</span>';
+    document.getElementById('quiz-question').innerHTML = '<span class="error-msg">データの読み込みに失敗しました。 / Failed to load data.</span>';
     return;
   }
   quizWaitingNext = false;
@@ -458,7 +467,7 @@ function newQuiz() {
   const formName = headers[quizColIdx] || 'その';
 
   document.getElementById('quiz-question').innerHTML =
-    `「${currentQuizItem[0]}（${currentQuizItem[1]}）」の<br><strong>${formName}</strong> のかたちは？`;
+    `「${currentQuizItem[0]}（${currentQuizItem[1]}）」の<br><strong>${formName}</strong> のかたちは？<span class="en-note" style="margin-top:8px;">What is the <strong>${formName}</strong> form of "${currentQuizItem[0]}"?</span>`;
   document.getElementById('quiz-answer').value = '';
   document.getElementById('quiz-feedback').innerText = '';
   document.getElementById('quiz-answer-reveal').innerText = '';
@@ -482,19 +491,19 @@ function checkAnswer() {
 
   if (isCorrect) {
     feedback.style.color = 'var(--primary)';
-    feedback.innerText = '✅ 正解！';
+    feedback.innerText = '✅ 正解！ / Correct!';
     reveal.innerText = '';
     document.getElementById('quiz-answer').disabled = true;
     setTimeout(newQuiz, 1000);
   } else {
     feedback.style.color = '#ff4b4b';
-    feedback.innerText = '❌ ちがうよ！';
+    feedback.innerText = '❌ ちがうよ！ / Incorrect!';
     reveal.innerText = `正解：${currentQuizItem[quizColIdx]}`;
     document.getElementById('quiz-answer').disabled = true;
     quizWaitingNext = true;
-    submitBtn.innerText = '次の問題へ →';
+    submitBtn.innerText = '次の問題へ → / Next Question';
   }
-  if (isCorrect) setTimeout(() => { submitBtn.innerText = '答え合わせ'; }, 1000);
+  if (isCorrect) setTimeout(() => { submitBtn.innerText = '答え合わせ / Check Answer'; }, 1000);
 }
 
 // ── 動詞をさがす（自由入力・kuromoji.js使用） ──
@@ -693,7 +702,7 @@ async function explorerSearchVerb() {
     }
 
     if (verbIdx === -1) {
-      resultEl.innerHTML = '<div class="explorer-error">⚠ 動詞として認識できませんでした。辞書形（例：食べる、書く、来る、する）で入力してください。</div>';
+      resultEl.innerHTML = '<div class="explorer-error">⚠ 動詞として認識できませんでした。辞書形（例：食べる、書く、来る、する (e.g. taberu, kaku, kuru, suru)）で入力してください。<span class="en-note">Not recognized as a verb. Please enter a dictionary-form verb.</span></div>';
       return;
     }
 
@@ -704,11 +713,11 @@ async function explorerSearchVerb() {
     const forms = conjugateVerb(basicForm, verbToken.conjugated_type || '');
 
     if (!forms) {
-      resultEl.innerHTML = `<div class="explorer-error">⚠ 「${prefix}${basicForm}」の活用型（${verbToken.conjugated_type || '不明'}）にはまだ対応していません。</div>`;
+      resultEl.innerHTML = `<div class="explorer-error">⚠ 「${prefix}${basicForm}」の活用型（${verbToken.conjugated_type || '不明'}）にはまだ対応していません。<span class="en-note">This conjugation type is not supported yet.</span></div>`;
       return;
     }
 
-    let html = `<div class="explorer-search-heading">「${prefix}${basicForm}」の活用形</div>`;
+    let html = `<div class="explorer-search-heading">「${prefix}${basicForm}」の活用形<span class="en-note">Conjugation forms</span></div>`;
     html += '<div class="explorer-search-result-container"><table class="back-table">';
     Object.keys(forms).forEach(label => {
       html += `<tr><th>${label}</th><td>${prefix}${forms[label]}</td></tr>`;
@@ -717,7 +726,7 @@ async function explorerSearchVerb() {
     resultEl.innerHTML = html;
   } catch (err) {
     console.error(err);
-    resultEl.innerHTML = '<div class="explorer-error">⚠ 辞書データの読み込みに失敗しました。ネットワーク接続を確認してください。</div>';
+    resultEl.innerHTML = '<div class="explorer-error">⚠ 辞書データの読み込みに失敗しました。ネットワーク接続を確認してください。<span class="en-note">Failed to load dictionary data. Please check your network connection.</span></div>';
   }
 }
 
