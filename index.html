@@ -467,7 +467,7 @@ function newQuiz() {
   const formName = headers[quizColIdx] || 'その';
 
   document.getElementById('quiz-question').innerHTML =
-    `「${currentQuizItem[0]}（${currentQuizItem[1]}）」の<br><strong>${formName}</strong> のかたちは？<span class="en-note" style="margin-top:8px;">What is the <strong>${formName}</strong> form of "${currentQuizItem[0]}"?</span>`;
+    `「${currentQuizItem[1]}（${currentQuizItem[2]}）」の<br><strong>${formName}</strong> のかたちは？<span class="en-note" style="margin-top:8px;">What is the <strong>${formName}</strong> form of "${currentQuizItem[1]}"?</span>`;
   document.getElementById('quiz-answer').value = '';
   document.getElementById('quiz-feedback').innerText = '';
   document.getElementById('quiz-answer-reveal').innerText = '';
