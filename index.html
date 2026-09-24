@@ -249,7 +249,7 @@ th, td {
 const URLS = {
   system: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=1804971889&single=true&output=csv",
   verb: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=99916749&single=true&output=csv",
-  example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=2070601702&single=true&output=csv"
+  example: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTDRPlyoBQrG9wzUadhnR8OY9sxuPhkRRpO_WO0BNs-H_f349__5bK5vN6ZYb3U_w/pub?gid=99916749&single=true&output=csv"
 };
 
 let dataStore = { system: [], verb: [], example: [] };
@@ -402,10 +402,10 @@ function renderCard() {
     frontEl.classList.add('example-front');
     backEl.classList.add('example-back');
     frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認 / Tap to reveal answer</span>';
-    // カンマで分割して各文を改行表示
-    const exampleText = row[9] || '';
+    // M列（6つの例文）。改行・カンマのどちらで区切られていても複数行表示にする
+    const exampleText = row[12] || '';
     backEl.innerHTML = exampleText
-      ? exampleText.split(',').map(s => s.trim()).filter(Boolean).join('<br>')
+      ? exampleText.split(/[\n,]/).map(s => s.trim()).filter(Boolean).join('<br>')
       : '（裏面データなし） / (No back-side data)';
   }
 
