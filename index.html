@@ -393,7 +393,7 @@ function renderCard() {
 
     const headers = data[0];
     let tableHtml = '<table class="back-table">';
-    for (let i = 5; i < headers.length; i++) {
+    for (let i = 5; i <= 11 && i < headers.length; i++) {
       if (!headers[i]) continue;
       tableHtml += `<tr><th>${headers[i]}</th><td>${row[i] || '―'}</td></tr>`;
     }
@@ -462,7 +462,7 @@ function newQuiz() {
   // 列の増減があってもheaders.lengthから動的に算出するため、
   // スプレッドシート側で列を追加/削除してもここを直す必要はない。
   const QUIZ_COL_MIN = 5; // F列
-  const QUIZ_COL_MAX = headers.length - 1;
+  const QUIZ_COL_MAX = Math.min(headers.length - 1, 11);
   quizColIdx = Math.floor(Math.random() * (QUIZ_COL_MAX - QUIZ_COL_MIN + 1)) + QUIZ_COL_MIN;
   const formName = headers[quizColIdx] || 'その';
 
