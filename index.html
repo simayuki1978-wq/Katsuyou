@@ -326,6 +326,60 @@ function toggleDarkMode() {
   html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 
+// 五十音（46文字）＋濁音・半濁音
+const GOJUON_CHARS = new Set(
+  ('あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん' +
+   'がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ').split('')
+);
+
+// 表は6行1セット（ない形・ます形・辞書形・ば形・意向形・て形）＋「###」区切り行の繰り返し。
+// 行の位置ごとに取り除く語尾を指定（辞書形は語尾なし＝そのまま最後の1文字を見る）
+const ROW_ENDING_BY_POSITION = ['ない', 'ます', '', 'ば', 'う', ['て', 'で']];
+
+function isDividerRow(row) {
+  for (let j = 0; j < 10; j++) {
+    const v = (row[j] || '').trim();
+    if (v !== '' && v !== '###') return false;
+  }
+  return true;
+}
+
+// セルの文字列から、活用語尾を除いた最後の1文字（五十音のときだけ）を太字にしたHTMLを作る
+function renderConjugationCell(rawCell, rowPosition) {
+  const cell = rawCell || '';
+  const escapeHtml = s => s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  if (cell === '') return '&nbsp;';
+
+  // 単独の五十音1文字セル（列見出し的なセル）はそのまま太字
+  if (cell.length === 1 && GOJUON_CHARS.has(cell)) {
+    return `<strong>${escapeHtml(cell)}</strong>`;
+  }
+
+  // 「いけば/いける」のように2つの形が入っている場合は最初の形だけを見る
+  const slashIdx = cell.indexOf('/');
+  const target = slashIdx === -1 ? cell : cell.slice(0, slashIdx);
+
+  const endingRule = ROW_ENDING_BY_POSITION[rowPosition];
+  let stem = target;
+  if (Array.isArray(endingRule)) {
+    for (const suf of endingRule) {
+      if (suf && stem.endsWith(suf)) { stem = stem.slice(0, -suf.length); break; }
+    }
+  } else if (endingRule && stem.endsWith(endingRule)) {
+    stem = stem.slice(0, -endingRule.length);
+  }
+
+  if (!stem) return escapeHtml(cell);
+  const boldChar = stem.slice(-1);
+  if (!GOJUON_CHARS.has(boldChar)) return escapeHtml(cell);
+
+  const beforeLen = stem.length - 1;
+  const before = cell.slice(0, beforeLen);
+  const after = cell.slice(beforeLen + 1);
+  return `${escapeHtml(before)}<strong>${escapeHtml(boldChar)}</strong>${escapeHtml(after)}`;
+}
+
 async function openConjugation() {
   showScreen('table-screen');
   const data = await fetchData('system');
@@ -333,19 +387,24 @@ async function openConjugation() {
     document.getElementById('table-content').innerHTML = '<p class="error-msg">データの読み込みに失敗しました。 / Failed to load data.</p>';
     return;
   }
-  const COL_COUNT = 10;
+  const COL_COUNT = 10; // A〜J列
   const ROW_COUNT = 20; // 15〜20行目の追加表も表示
   let html = '<table>';
   const startRow = 0;
+  let blockPosition = 0; // ブロック内の行位置（0〜5）。「###」区切り行でリセットされる
   for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
     const row = data[i];
+    const divider = isDividerRow(row);
     html += '<tr>';
     for (let j = 0; j < COL_COUNT; j++) {
       const cell = row[j] !== undefined ? row[j] : '';
-      const display = cell === '' ? '&nbsp;' : cell.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const display = divider
+        ? (cell === '' ? '&nbsp;' : cell.replace(/</g, '&lt;').replace(/>/g, '&gt;'))
+        : renderConjugationCell(cell, blockPosition % 6);
       html += `<td>${display}</td>`;
     }
     html += '</tr>';
+    blockPosition = divider ? 0 : blockPosition + 1;
   }
   html += '</table>';
   document.getElementById('table-content').innerHTML = html;
