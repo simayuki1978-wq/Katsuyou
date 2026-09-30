@@ -395,10 +395,11 @@ async function openConjugation() {
   for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
     const row = data[i];
     const divider = isDividerRow(row);
+    const boldExcluded = i >= 14; // 15〜20行目（追加表）は太字判定の対象外
     html += '<tr>';
     for (let j = 0; j < COL_COUNT; j++) {
       const cell = row[j] !== undefined ? row[j] : '';
-      const display = divider
+      const display = (divider || boldExcluded)
         ? (cell === '' ? '&nbsp;' : cell.replace(/</g, '&lt;').replace(/>/g, '&gt;'))
         : renderConjugationCell(cell, blockPosition % 6);
       html += `<td>${display}</td>`;
