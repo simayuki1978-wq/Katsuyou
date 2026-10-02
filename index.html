@@ -334,7 +334,8 @@ const GOJUON_CHARS = new Set(
 
 // 表は6行1セット（ない形・ます形・辞書形・ば形・意向形・て形）＋「###」区切り行の繰り返し。
 // 行の位置ごとに取り除く語尾を指定（辞書形は語尾なし＝そのまま最後の1文字を見る）
-const ROW_ENDING_BY_POSITION = ['ない', 'ます', '', 'ば', 'う', ['て', 'で']];
+const ROW_ENDING_BY_POSITION = ['ない', 'ます', '', 'ば', 'う']; // position 5（て形）は専用ルールで処理
+const TE_FORM_BOLD_PATTERNS = ['いて', 'して', 'って', 'んで', 'いで'];
 
 function isDividerRow(row) {
   for (let j = 0; j < 10; j++) {
@@ -359,6 +360,17 @@ function renderConjugationCell(rawCell, rowPosition) {
   // 「いけば/いける」のように2つの形が入っている場合は最初の形だけを見る
   const slashIdx = cell.indexOf('/');
   const target = slashIdx === -1 ? cell : cell.slice(0, slashIdx);
+
+  // て形（6行目）は「いて・して・って・んで・いで」のどれかに一致したら、その2文字をまとめて太字
+  if (rowPosition === 5) {
+    const match = TE_FORM_BOLD_PATTERNS.find(p => target.endsWith(p));
+    if (!match) return escapeHtml(cell);
+    const beforeLen = target.length - match.length;
+    const before = cell.slice(0, beforeLen);
+    const boldPart = cell.slice(beforeLen, beforeLen + match.length);
+    const after = cell.slice(beforeLen + match.length);
+    return `${escapeHtml(before)}<strong>${escapeHtml(boldPart)}</strong>${escapeHtml(after)}`;
+  }
 
   const endingRule = ROW_ENDING_BY_POSITION[rowPosition];
   let stem = target;
@@ -395,7 +407,7 @@ async function openConjugation() {
   for (let i = startRow; i < Math.min(startRow + ROW_COUNT, data.length); i++) {
     const row = data[i];
     const divider = isDividerRow(row);
-    const boldExcluded = i >= 14; // 15〜20行目（追加表）は太字判定の対象外
+    const boldExcluded = i >= 12; // 「いく・おきる・くる・する」の追加表は太字判定の対象外（###削除により2行分前にずれた）
     html += '<tr>';
     for (let j = 0; j < COL_COUNT; j++) {
       const cell = row[j] !== undefined ? row[j] : '';
