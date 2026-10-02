@@ -313,6 +313,12 @@ const SCREEN_TITLES = {
   'explorer-screen': { ja: '🔍 動詞エクスプローラー', en: 'Verb Explorer' }
 };
 
+// メニューのボタン名と文言を統一するため、カード画面は動詞／例文で出し分ける
+const CARD_MODE_TITLES = {
+  verb: { ja: '📘 動詞カード', en: 'Verb Cards' },
+  example: { ja: '📝 例文カード', en: 'Example Cards' }
+};
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -426,6 +432,11 @@ async function openConjugation() {
 async function openFlashcard(mode) {
   currentMode = mode;
   showScreen('card-screen');
+  const titles = CARD_MODE_TITLES[mode];
+  if (titles) {
+    document.getElementById('screen-title').innerText = titles.ja;
+    document.getElementById('screen-title-en').innerText = titles.en;
+  }
   document.getElementById('card-front-content').innerHTML = '読み込み中... / Loading...';
   document.getElementById('card-back-content').innerHTML = '';
   const data = await fetchData(mode);
