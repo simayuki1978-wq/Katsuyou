@@ -453,6 +453,11 @@ async function openFlashcard(mode) {
   renderCard();
 }
 
+// 動詞カード・例文カードの表示前に、セルの中身をHTMLとして解釈されない文字にする
+function escapeHtml(s) {
+  return (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function renderCard() {
   const data = dataStore[currentMode];
   if (!data || !data[currentIndex]) {
@@ -472,23 +477,23 @@ function renderCard() {
 
   if (currentMode === 'verb') {
     frontEl.classList.add('verb-front');
-    frontEl.innerHTML = row.slice(0, 5).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認 / Tap to reveal answer</span>';
+    frontEl.innerHTML = row.slice(0, 5).filter(Boolean).map(escapeHtml).join('<br>') + '<br><span class="card-hint">タップで答えを確認 / Tap to reveal answer</span>';
 
     const headers = data[0];
     let tableHtml = '<table class="back-table">';
     for (let i = 5; i <= 11 && i < headers.length; i++) {
       if (!headers[i]) continue;
-      tableHtml += `<tr><th>${headers[i]}</th><td>${row[i] || '―'}</td></tr>`;
+      tableHtml += `<tr><th>${escapeHtml(headers[i])}</th><td>${row[i] ? escapeHtml(row[i]) : '―'}</td></tr>`;
     }
     backEl.innerHTML = tableHtml + '</table>';
   } else if (currentMode === 'example') {
     frontEl.classList.add('example-front');
     backEl.classList.add('example-back');
-    frontEl.innerHTML = row.slice(0, 3).filter(Boolean).join('<br>') + '<br><span class="card-hint">タップで答えを確認 / Tap to reveal answer</span>';
+    frontEl.innerHTML = row.slice(0, 3).filter(Boolean).map(escapeHtml).join('<br>') + '<br><span class="card-hint">タップで答えを確認 / Tap to reveal answer</span>';
     // M列（6つの例文）。改行・カンマのどちらで区切られていても複数行表示にする
     const exampleText = row[12] || '';
     backEl.innerHTML = exampleText
-      ? exampleText.split(/[\n,]/).map(s => s.trim()).filter(Boolean).join('<br>')
+      ? exampleText.split(/[\n,]/).map(s => s.trim()).filter(Boolean).map(escapeHtml).join('<br>')
       : '（裏面データなし） / (No back-side data)';
   }
 
